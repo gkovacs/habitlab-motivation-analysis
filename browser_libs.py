@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 82bc1465e6216d24eb2eb684e97f81e1
+# md5: fdf1f5c9783581a77d304ce916edb649
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -100,6 +100,7 @@ def get_collection_for_user(user, collection_name):
 
 
 
+@memoize
 def get_collection_names():
   collection_names = get_collection_items('collections')
   return [x['_id'] for x in collection_names]
