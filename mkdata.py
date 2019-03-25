@@ -1,7 +1,11 @@
 #!/usr/bin/env python
-# md5: 3299aac8b52b468870961be6b18b85c8
+# md5: 32f948153c626a6de9b599cb70af69cf
 #!/usr/bin/env python
 # coding: utf-8
+
+
+
+from typing import Dict, List, Tuple
 
 
 
@@ -10,23 +14,23 @@ import sys
 
 
 
-
-
-
-
-from memoize import memoize # pip install memoize2
-import diskmemo
-reload(diskmemo)
-from diskmemo import diskmemo
-
-
-
 from importlib import reload
 
 
 
-import libmotivation
-reload(libmotivation)
+from memoize import memoize # pip install memoize2
+#import diskmemo
+#reload(diskmemo)
+from diskmemo import diskmemo
+
+
+
+import torch
+
+
+
+#import libmotivation
+#reload(libmotivation)
 from libmotivation import *
 
 
@@ -220,12 +224,16 @@ def get_domain_to_category():
   return json.load(open('domain_to_category.json'))
 
 @memoize
-def get_category_list():
-  return list(set(domain_to_category.values()))
+def get_domain_category_list():
+  return list(set(get_domain_to_category().values()))
+
+@memoize
+def get_domain_productivity_list():
+  return list(set(get_domain_to_productivity().values()))
 
 @memoize
 def get_domain_to_category_idx():
-  category_list = get_category_list()
+  category_list = get_domain_category_list()
   domain_to_category = get_domain_to_category()
   domain_to_category_idx = {}
   for domain,category in domain_to_category.items():
@@ -245,14 +253,21 @@ def get_domain_to_productivity_idx():
 
 
 
-history_length = 10
+difficulty_to_idx = {
+  'nothing': 0,
+  'easy': 1,
+  'medium': 2,
+  'hard': 3,
+}
+
+
+
+history_length = 100
 
 def make_features_for_user(user):
   output = []
   difficulty_items = get_choose_difficulty_items_for_user(user)
-  prior_difficulties = []
-  prior_urls = []
-  prior_arrow_times = []
+  prior_entries = []
   languages = get_languages_for_user(user)
   initial_difficulty = get_initial_difficulty_for_user(user)
   if initial_difficulty == None:
@@ -269,22 +284,34 @@ def make_features_for_user(user):
     difficulty = item['difficulty']
     url = item['url']
     arrow_time = get_time_adjusted_for_timezone(item['timestamp_local'], item['localtime'])
-    output.append({'url': url, 'user': user, 'initial_difficulty': initial_difficulty, 'languages': languages, 'difficulty': difficulty, 'arrow_time': arrow_time, 'prior_urls': prior_urls[:], 'prior_difficulties': prior_difficulties[:], 'prior_arrow_times': prior_arrow_times[:]})
-    prior_difficulties.append(difficulty)
-    prior_urls.append(url)
-    prior_arrow_times.append(arrow_time)
-    if len(prior_difficulties) > history_length:
-      prior_difficulties = prior_difficulties[-history_length:]
-      prior_urls = prior_urls[-history_length:]
-      prior_arrow_times  = prior_arrow_times[-history_length:]
+    output.append({
+      'url': url,
+      'user': user,
+      'initial_difficulty': initial_difficulty,
+      'languages': languages,
+      'difficulty': difficulty,
+      'arrow_time': arrow_time,
+      'prior_entries': prior_entries[:],
+    })
+    prior_entries.append({
+      'url': url,
+      'difficulty': difficulty,
+      'arrow_time': arrow_time,
+    })
+    if len(prior_entries) > history_length:
+      prior_entries = prior_entries[-history_length:]
   return output
 
 
 
 @diskmemo
+def get_users():
+  return get_users_with_choose_difficulty()
+
+@diskmemo
 def get_all_features_data():
   all_features_data = []
-  for user in get_users_with_choose_difficulty():
+  for user in get_users():
     print(user)
     #tensors = make_tensors_for_user(user)
     feature_list = make_features_for_user(user)
@@ -294,27 +321,13 @@ def get_all_features_data():
 
 
 
+
+
+
+
 all_features_data = get_all_features_data()
 
 
-
-
-
-def make_tensors_for_user(user):
-  features = make_features_for_user(user)
-  return make_tensors_from_features(features)
-
-# def make_tensor_from_prior_difficulties_list(prior_difficulties):
-#   tensor = torch.zeros(len(prior_difficulties), 1, n_features)
-#   for idx,difficulty in enumerate(prior_difficulties):
-#     difficulty_idx = difficulty_to_idx[difficulty]
-#     tensor[idx][0][difficulty_idx] = 1
-#   return tensor
-
-def make_tensor_from_chosen_difficulty(chosen_difficulty):
-  difficulty_idx = difficulty_to_idx[chosen_difficulty]
-  tensor = torch.tensor([difficulty_idx], dtype=torch.long)
-  return tensor
 
 def make_tensors_from_features_v1(features):
   output = []
@@ -345,17 +358,6 @@ def make_tensors_from_features_v2(features):
       feature_tensor[idx][0][0] = difficulty_idx
     output.append({'user': user, 'chosen_difficulty': chosen_difficulty, 'category': category_tensor, 'feature': feature_tensor})
   return output
-
-def hour_to_hour_idx_4cat(hour): # hour: 0 to 24
-  if 0 <= hour <= 6:
-    return 0
-  if 6 < hour <= 12:
-    return 1
-  if 12 < hour <= 18:
-    return 2
-  if 18 < hour <= 24:
-    return 3
-  raise Exception(hour)
 
 def make_tensors_from_features_v3(features):
   output = []
@@ -412,28 +414,6 @@ def make_tensors_from_features_v4(features):
         feature_tensor[idx][0][4 + 4 + 7 + 5 + domain_category_idx] = 1
     output.append({'user': user, 'chosen_difficulty': chosen_difficulty, 'category': category_tensor, 'feature': feature_tensor})
   return output
-
-def get_domain_features_from_url(url):
-  domain = url_to_domain(url)
-  have_productivity_idx = False
-  if domain in domain_to_productivity_idx:
-    domain_productivity_idx = domain_to_productivity_idx[domain]
-    have_productivity_idx = True
-  else:
-    domain_productivity_idx = None
-  have_category_idx = False
-  if domain in domain_to_category_idx:
-    domain_category_idx = domain_to_productivity_idx[domain]
-    have_category_idx = True
-  else:
-    domain_category_idx = None
-  return domain_productivity_idx,have_productivity_idx,domain_category_idx,have_category_idx
-
-def get_time_features_from_arrow(arrow_time):
-  hour = arrow_time.hour
-  hour_idx = hour_to_hour_idx_4cat(hour)
-  weekday_idx = arrow_time.weekday()
-  return hour_idx,weekday_idx
 
 def make_tensors_from_features_v5(features): # this one cheats because we have the reference information included
   output = []
@@ -520,5 +500,180 @@ def make_tensors_from_features_v6(features): # this one cheats because we have t
     output.append({'user': user, 'chosen_difficulty': chosen_difficulty, 'category': category_tensor, 'feature': feature_tensor})
   return output
 
-make_tensors_from_features = make_tensors_from_features_v6
+
+
+
+
+
+
+
+
+#def make_tensors_for_user(user):
+#  features = make_features_for_user(user)
+#  return make_tensors_from_features(features)
+
+# def make_tensor_from_prior_difficulties_list(prior_difficulties):
+#   tensor = torch.zeros(len(prior_difficulties), 1, n_features)
+#   for idx,difficulty in enumerate(prior_difficulties):
+#     difficulty_idx = difficulty_to_idx[difficulty]
+#     tensor[idx][0][difficulty_idx] = 1
+#   return tensor
+
+
+
+
+
+
+
+def make_tensor_from_chosen_difficulty(chosen_difficulty : str):
+  difficulty_idx = difficulty_to_idx[chosen_difficulty]
+  tensor = torch.tensor([difficulty_idx], dtype=torch.long)
+  return tensor
+
+def hour_to_hour_idx_4cat(hour : int) -> int: # hour: 0 to 24
+  if 0 <= hour <= 6:
+    return 0
+  if 6 < hour <= 12:
+    return 1
+  if 12 < hour <= 18:
+    return 2
+  if 18 < hour <= 24:
+    return 3
+  raise Exception(hour)
+
+def get_domain_features_from_url(url : str):
+  domain = url_to_domain(url)
+  have_productivity_idx = False
+  if domain in domain_to_productivity_idx:
+    domain_productivity_idx = domain_to_productivity_idx[domain]
+    have_productivity_idx = True
+  else:
+    domain_productivity_idx = None
+  have_category_idx = False
+  if domain in domain_to_category_idx:
+    domain_category_idx = domain_to_productivity_idx[domain]
+    have_category_idx = True
+  else:
+    domain_category_idx = None
+  return domain_productivity_idx,have_productivity_idx,domain_category_idx,have_category_idx
+
+def get_time_features_from_arrow(arrow_time):
+  hour = arrow_time.hour
+  hour_idx = hour_to_hour_idx_4cat(hour)
+  weekday_idx = arrow_time.weekday()
+  return hour_idx,weekday_idx
+
+
+
+#%%typecheck --ignore-missing-imports
+
+#hour_to_hour_idx_4cat(6)
+
+
+
+
+
+
+
+
+def get_features_and_sizes() -> List[Tuple[str, int]]:
+  return [
+    ('difficulty', 4),
+    ('time_of_day_4', 4),
+    ('day_of_week', 7),
+    ('domain_productivity', len(get_domain_productivity_list())),
+    ('domain_category', len(get_domain_category_list())),
+    #[],
+  ]
+
+@memoize
+def get_enabled_features_with_sizes(enabled_features : Dict[str, bool]) -> List[Tuple[str, int]]:
+  output = []
+  features_and_sizes = get_features_and_sizes()
+  for feature,size in features_and_sizes:
+    if enabled_features.get(feature, False) == False:
+      continue
+    output.append((feature, size))
+  return output
+
+@memoize
+def get_num_features():
+  return len(get_enabled_features_with_sizes())
+
+def make_get_index(enabled_features):
+  current_idx = 0
+  feature_name_to_idx = {}
+  features_and_sizes = get_enabled_features_with_sizes(enabled_features)
+  for feature,size in features_and_sizes:
+    if enabled_features.get(feature, False) == False:
+      continue
+    feature_name_to_idx[feature] = current_idx
+    current_idx += size
+  def get_index(feature):
+    return feature_name_to_idx[feature]
+  return get_index
+
+def make_tensors_from_features_v7(features): # this one cheats because we have the reference information included
+  output = []
+  for feature in features:
+    url = feature['url']
+    domain_productivity_idx,have_productivity_idx,domain_category_idx,have_category_idx = get_domain_features_from_url(url)
+    hour_idx,weekday_idx = get_time_features_from_arrow(feature['arrow_time'])
+    chosen_difficulty = feature['difficulty']
+    language_indexes = convert_language_list_to_language_indexes(feature['languages'])
+    prior_difficulties = feature['prior_difficulties']
+    user = feature['user']
+    category_tensor = make_tensor_from_chosen_difficulty(chosen_difficulty)
+    feature_tensor = torch.zeros(len(prior_difficulties)+1, 1, n_features) # n_features = 15 in this version
+    # features for current timestep
+    idx = len(prior_difficulties)
+    difficulty = feature['difficulty']
+    difficulty_idx = difficulty_to_idx[difficulty]
+    #if len(prior_difficulties) > 0:
+    #  feature_tensor[idx][0][difficulty_to_idx[prior_difficulties[-1]]] = 1
+    #feature_tensor[idx][0][difficulty_idx] = 1 # this is an impossible feature. see whether it learns corectly
+    feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + difficulty_to_idx[feature['initial_difficulty']]] = 1
+    for language_index in language_indexes:
+      feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + 5 + language_index] = 1
+    feature_tensor[idx][0][4 + hour_idx] = 1
+    feature_tensor[idx][0][4 + 4 + weekday_idx] = 1
+    if have_productivity_idx:
+      feature_tensor[idx][0][4 + 4 + 7 + domain_productivity_idx] = 1
+    if have_category_idx:
+      feature_tensor[idx][0][4 + 4 + 7 + 5 + domain_category_idx] = 1
+    # features for previous timesteps
+    for idx,difficulty in enumerate(prior_difficulties):
+      difficulty_idx = difficulty_to_idx[difficulty]
+      #feature_tensor[idx][0][difficulty_idx] = 1
+      hour_idx,weekday_idx = get_time_features_from_arrow(feature['prior_arrow_times'][idx])
+      domain_productivity_idx,have_productivity_idx,domain_category_idx,have_category_idx = get_domain_features_from_url(feature['prior_urls'][idx])
+      feature_tensor[idx][0][4 + hour_idx] = 1
+      feature_tensor[idx][0][4 + 4 + weekday_idx] = 1
+      if have_productivity_idx:
+        feature_tensor[idx][0][4 + 4 + 7 + domain_productivity_idx] = 1
+      if have_category_idx:
+        feature_tensor[idx][0][4 + 4 + 7 + 5 + domain_category_idx] = 1
+      feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + difficulty_to_idx[feature['initial_difficulty']]] = 1
+      for language_index in language_indexes:
+        feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + 5 + language_index] = 1
+    output.append({'user': user, 'chosen_difficulty': chosen_difficulty, 'category': category_tensor, 'feature': feature_tensor})
+  return output
+
+make_tensors_from_features = make_tensors_from_features_v7
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

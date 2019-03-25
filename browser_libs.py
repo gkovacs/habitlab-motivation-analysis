@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: fdf1f5c9783581a77d304ce916edb649
+# md5: c976d7125176410b038c8d15c8f971a7
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -9,9 +9,6 @@ import os
 if 'R_HOME' not in os.environ:
   os.environ['R_HOME'] = '/usr/lib/R'
 
-
-
-get_ipython().run_line_magic('load_ext', 'rpy2.ipython')
 
 
 

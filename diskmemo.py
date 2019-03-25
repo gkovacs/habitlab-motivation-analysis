@@ -1,9 +1,14 @@
 #!/usr/bin/env python
-# md5: 0bcfe4e6556c6229c2da6ec12409b373
+# md5: 4674ada12d96df29d7267152b7fffa67
 #!/usr/bin/env python
 # coding: utf-8
 
 
+
+try:
+  from typing import Dict, Any
+except ImportError:
+  pass
 
 import numpy as np
 import os, shelve, inspect, functools, hashlib
@@ -11,7 +16,7 @@ import os, shelve, inspect, functools, hashlib
 # doesn't work with nested stuff (like dicts in argument lists)
 
 cache_dirname = 'cached_func_calls'
-path_to_shelve = {}
+path_to_shelve = {} # type: Dict[str, Any]
 
 def diskmemo(f):
     if not os.path.isdir(cache_dirname):
