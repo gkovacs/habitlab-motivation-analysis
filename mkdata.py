@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c8fca481cbc5bc8d8a1b53d91fab70b5
+# md5: 8d59c1e3772c7b220aeac2722707bf4b
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -267,6 +267,7 @@ def make_features_for_user(user):
   initial_difficulty = get_initial_difficulty_for_user(user)
   if initial_difficulty == None:
     return []
+  idx = 0
   for item in difficulty_items:
     if 'is_random' in item and item['is_random'] == True:
       continue
@@ -287,14 +288,17 @@ def make_features_for_user(user):
       'difficulty': difficulty,
       'arrow_time': arrow_time,
       'prior_entries': prior_entries[:],
+      'idx': idx,
     })
     prior_entries.append({
       'url': url,
       'difficulty': difficulty,
       'arrow_time': arrow_time,
+      'idx': idx,
     })
     if len(prior_entries) > history_length:
       prior_entries = prior_entries[-history_length:]
+    idx += 1
   return output
 
 
@@ -316,11 +320,16 @@ def get_all_features_data():
 
 
 
+def split_into_train_dev_test(all_data):
+  training_data = all_data[:int(math.floor(len(all_data)*9/10))]
+  dev_and_test_data = all_data[len(training_data):]
+  dev_data = dev_and_test_data[:int(math.floor(len(dev_and_test_data)/2))]
+  test_data = dev_and_test_data[len(dev_data):]
+  return training_data,dev_data,test_data
 
 
 
-
-all_features_data = get_all_features_data()
+#all_features_data = get_all_features_data()
 
 
 
@@ -564,31 +573,30 @@ def get_time_features_from_arrow(arrow_time) -> Tuple[int, int]:
 
 
 @memoize
-def get_enabled_features_with_sizes(enabled_features_list : List[str]) -> List[Tuple[str, int]]:
+def get_enabled_feature_info_list(enabled_features_list : List[str]) -> List[Dict[str, Any]]:
   output = []
   enabled_features = set(enabled_features_list)
   all_features = get_feature_info_list()
   for item in all_features:
     feature = item['name']
-    size = item['size']
     if feature not in enabled_features:
       continue
-    output.append((feature, size))
+    output.append(item)
   return output
 
 @memoize
 def get_num_features(enabled_features_list: List[str]) -> int:
-  return len(get_enabled_features_with_sizes(enabled_features_list))
+  return sum([x['size'] for x in get_enabled_feature_info_list(enabled_features_list)])
 
 @memoize
 def make_get_index(enabled_feature_list : List[str]):
   enabled_features = set(enabled_feature_list)
   current_idx = 0
   feature_name_to_idx = {}
-  features_and_sizes = get_enabled_features_with_sizes(enabled_feature_list)
-  for feature,size in features_and_sizes:
-    if feature not in enabled_features:
-      continue
+  feature_info_list = get_enabled_feature_info_list(enabled_feature_list)
+  for item in feature_info_list:
+    feature = item['name']
+    size = item['size']
     feature_name_to_idx[feature] = current_idx
     current_idx += size
   def get_index(feature : str) -> int:
@@ -662,7 +670,7 @@ def get_features_concise():
     ('domain_productivity', len(get_domain_productivity_list()), get_domain_productivity_idx),
     ('domain_category', len(get_domain_category_list()), get_domain_category_idx),
     ('initial_difficulty', 4, get_difficulty_idx),
-    ('languages', len(get_num_languages()), get_language_idx)
+    ('languages', get_num_languages(), get_language_idx)
   ]
 
 @memoize
@@ -699,8 +707,31 @@ def get_feature(feature_name):
 def get_offset_computer(feature_name):
   return get_feature(feature_name)['compute']
 
+
+
+#def last_n_entries(l, n):
+#  return l[-n:]
+
+#print(last_n_entries([1,2,3,4,5,6], 3))
+
+
+
+def sample_prior_visits_every_n_visits(l, n):
+  output = []
+  for x in l:
+    if (x['idx'] % n) == 0:
+      output.append(x)
+  return output
+
 # todo attach a num_prior_entries entry. so that we only use that many prior entries
-def make_tensors_from_features_v7(features, enabled_feature_list):
+def make_tensors_from_features_v7(features, parameters):
+  enabled_feature_list = parameters['enabled_feature_list']
+  num_prior_entries = parameters.get('num_prior_entries', 10)
+  sample_every_n_visits = parameters.get('sample_every_n_visits', 1)
+  sample_difficulty_every_n_visits = parameters.get('sample_difficulty_every_n_visits', 1)
+  disable_prior_visit_history = parameters.get('disable_prior_visit_history', False)
+  disable_difficulty_history = parameters.get('disable_difficulty_history', False)
+  enable_current_difficulty = parameters.get('enable_current_difficulty', False)
   output = []
   for feature in features:
     #url = feature['url']
@@ -710,16 +741,21 @@ def make_tensors_from_features_v7(features, enabled_feature_list):
     #language_indexes = convert_language_list_to_language_indexes(feature['languages'])
     #prior_difficulties = feature['prior_difficulties']
     #user = feature['user']
-    category_tensor = make_tensor_from_chosen_difficulty(chosen_difficulty)
-    feature_tensor = torch.zeros(len(prior_difficulties)+1, 1, get_num_features()) # n_features = 15 in this version
+    prior_entries = []
+    if not disable_prior_visit_history:
+      prior_entries = sample_prior_visits_every_n_visits(feature['prior_entries'], sample_every_n_visits)
+    history_length_current = min(num_prior_entries, len(prior_entries))
+    category_tensor = make_tensor_from_chosen_difficulty(feature['difficulty'])
+    feature_tensor = torch.zeros(history_length_current+1, 1, get_num_features(enabled_feature_list)) # n_features = 15 in this version
     f = make_feature_setter(feature_tensor, enabled_feature_list)
     # features for current timestep
-    idx = len(feature['prior_entries'])
+    idx = history_length_current # len(feature['prior_entries'])
     #difficulty = feature['difficulty']
     #difficulty_idx = difficulty_to_idx[difficulty]
     #if len(prior_difficulties) > 0:
     #  feature_tensor[idx][0][difficulty_to_idx[prior_difficulties[-1]]] = 1
-    f(idx, 'difficulty', feature['difficulty']) # this is an impossible feature. see whether it learns correctly
+    if enable_current_difficulty:
+      f(idx, 'difficulty', feature['difficulty']) # this is an impossible feature. see whether it learns correctly
     #feature_tensor[idx][0][difficulty_idx] = 1 # this is an impossible feature. see whether it learns corectly
     f(idx, 'initial_difficulty', feature['initial_difficulty'])
     #feature_tensor[idx][0][fi('initial_difficulty') + difficulty_to_idx[feature['initial_difficulty']]] = 1
@@ -738,29 +774,41 @@ def make_tensors_from_features_v7(features, enabled_feature_list):
     #  feature_tensor[idx][0][4 + 4 + 7 + 5 + domain_category_idx] = 1
     f(idx, 'domain_category', feature['url'])
     # features for previous timesteps
-    for idx,prior_entry in enumerate(feature['prior_entries']):
+    for idx,prior_entry in enumerate(prior_entries[-history_length_current:]):
       #difficulty_idx = difficulty_to_idx[difficulty]
       #feature_tensor[idx][0][difficulty_idx] = 1
+      if (not disable_difficulty_history) and ((prior_entry['idx'] % sample_difficulty_every_n_visits) == 0):
+        f(idx, 'difficulty', prior_entry['difficulty'])
+      f(idx, 'initial_difficulty', feature['initial_difficulty'])
+      for language in feature['languages']:
+        f(idx, 'languages', language)
       #hour_idx,weekday_idx = get_time_features_from_arrow(feature['prior_arrow_times'][idx])
       #domain_productivity_idx,have_productivity_idx,domain_category_idx,have_category_idx = get_domain_features_from_url(feature['prior_urls'][idx])
       #feature_tensor[idx][0][4 + hour_idx] = 1
       f(idx, 'time_of_day', prior_entry['arrow_time'])
+      f(idx, 'day_of_week', prior_entry['arrow_time'])
       #feature_tensor[idx][0][4 + 4 + weekday_idx] = 1
-      if have_productivity_idx:
-        feature_tensor[idx][0][4 + 4 + 7 + domain_productivity_idx] = 1
-      if have_category_idx:
-        feature_tensor[idx][0][4 + 4 + 7 + 5 + domain_category_idx] = 1
-      feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + difficulty_to_idx[feature['initial_difficulty']]] = 1
-      for language_index in language_indexes:
-        feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + 5 + language_index] = 1
-    output.append({'user': user, 'chosen_difficulty': chosen_difficulty, 'category': category_tensor, 'feature': feature_tensor})
+      #if have_productivity_idx:
+      #  feature_tensor[idx][0][4 + 4 + 7 + domain_productivity_idx] = 1
+      f(idx, 'domain_productivity', prior_entry['url'])
+      #if have_category_idx:
+      #  feature_tensor[idx][0][4 + 4 + 7 + 5 + domain_category_idx] = 1
+      f(idx, 'domain_category', prior_entry['url'])
+      #feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + difficulty_to_idx[feature['initial_difficulty']]] = 1
+      #for language_index in language_indexes:
+      #  feature_tensor[idx][0][4 + 4 + 7 + 5 + 69 + 5 + language_index] = 1
+    output.append({'user': feature['user'], 'chosen_difficulty': feature['difficulty'], 'category': category_tensor, 'feature': feature_tensor})
   return output
 
 make_tensors_from_features = make_tensors_from_features_v7
 
 
 
+#print(get_num_features(get_feature_names()))
 
+
+
+#all_data_tensors = make_tensors_from_features(all_features_data, get_feature_names(), 10)
 
 
 
