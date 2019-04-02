@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 8d59c1e3772c7b220aeac2722707bf4b
+# md5: 035cd3642513ed101bb353d44f6a6de7
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -21,7 +21,12 @@ from importlib import reload
 from memoize import memoize # pip install memoize2
 #import diskmemo
 #reload(diskmemo)
-from diskmemo import diskmemo
+#from diskmemo import diskmemo
+#import jsonmemo
+#reload(jsonmemo)
+from jsonmemo import set_cache_dirname as set_jsonmemo_cache_dirname
+from jsonmemo import jsonmemo
+set_jsonmemo_cache_dirname('2019_04_01')
 
 
 
@@ -91,7 +96,7 @@ def get_languages_for_user(user):
 
 @memoize
 def get_language_list():
-  user_list = get_users_with_choose_difficulty()
+  user_list = get_users()
   output = set()
   for user in user_list:
     for language in get_languages_for_user(user):
@@ -303,11 +308,11 @@ def make_features_for_user(user):
 
 
 
-@diskmemo
+@jsonmemo
 def get_users():
   return get_users_with_choose_difficulty()
 
-@diskmemo
+@jsonmemo
 def get_all_features_data():
   all_features_data = []
   for user in get_users():
@@ -317,6 +322,11 @@ def get_all_features_data():
     for features in feature_list:
       all_features_data.append(features)
   return all_features_data
+
+
+
+#all_features_data = get_all_features_data()
+#print(len(all_features_data))
 
 
 
@@ -804,6 +814,7 @@ make_tensors_from_features = make_tensors_from_features_v7
 
 
 
+#print(get_feature_names())
 #print(get_num_features(get_feature_names()))
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 4674ada12d96df29d7267152b7fffa67
+# md5: ac3dbb8891049afe7000ca2a02be8e4f
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -15,23 +15,33 @@ import os, shelve, inspect, functools, hashlib
 
 # doesn't work with nested stuff (like dicts in argument lists)
 
-cache_dirname = 'cached_func_calls'
+cache_dirname = None
+
+def set_cache_dirname(new_cache_dirname):
+  global cache_dirname
+  cache_dirname = new_cache_dirname
+
+def get_cache_dirname():
+  if cache_dirname == None:
+    return 'cached_func_calls'
+  return cache_dirname
+
 path_to_shelve = {} # type: Dict[str, Any]
 
 def diskmemo(f):
     if not os.path.isdir(cache_dirname):
         os.mkdir(cache_dirname)
-        print('Created cache directory %s' % os.path.join(os.path.abspath(__file__),cache_dirname))
+        print('Created cache directory %s' % os.path.join(os.path.abspath(__file__), get_cache_dirname()))
 
     cache_filename = f.__module__ + f.__name__
-    cachepath = os.path.join(cache_dirname, cache_filename)
+    cachepath = os.path.join(get_cache_dirname(), cache_filename)
     memcache = {}
-    cache = path_to_shelve.get(cachepath, None)
+    cache = path_to_shelve.get(cache_filename, None)
     if cache == None:
       try:
         cache = shelve.open(cachepath,protocol=2)
         print('successfully opened %s' % cachepath)
-        path_to_shelve[cachepath] = cache
+        path_to_shelve[cache_filename] = cache
       except Exception as e:
         print('Could not open cache file %s, maybe name collision' % cachepath)
         print(e)

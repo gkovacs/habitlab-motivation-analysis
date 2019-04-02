@@ -1,3 +1,6 @@
+current.json
+*.json
+.mypy_cache
 cached_func_calls
 .DS_Store
 .DS_Store?

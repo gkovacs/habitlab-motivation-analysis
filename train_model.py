@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 86eb17c65e86a50ee67999c5a1b39bc4
+# md5: 8b2eceac7045d1ec92fa5171e8a60b7a
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -12,6 +12,8 @@ from mkdata import *
 import torch
 import torch.nn as nn
 import numpy as np
+import os
+import os.path
 
 
 
@@ -133,18 +135,21 @@ print_every = 1
 plot_every = 1
 all_losses = []
 
-for sample_difficulty_every_n_visits in range(1, 11):
+for sample_difficulty_every_n_visits in range(1, 1001):
+  outfile = 'model_attention_nohistory_fulldata_nhidden512_sample_difficulty_every_n_visits_' + str(sample_difficulty_every_n_visits) + '_v10_epoch' + str(epoch) + '.pt'
+  if os.path.exists(outfile):
+    continue
   print('making training data for sample_difficulty_every_n_visits', sample_difficulty_every_n_visits)
-  training_data = make_tensors_from_features(training_data_all_features[:int(len(training_data_all_features) / 10)], {
+  training_data = make_tensors_from_features(training_data_all_features, {
     'enabled_feature_list': feature_names,
     'num_prior_entries': num_prior_entries,
     'enable_current_difficulty': enable_current_difficulty,
-    'sample_difficulty_every_n_visits': sample_every_n_visits,
+    'sample_difficulty_every_n_visits': sample_difficulty_every_n_visits,
   })
   model = SelfAttentionLSTM({'word_embed_size': num_features, 'window_embed_size': 128})
   epoch = 1
   all_training_items = iterateTrainingData(training_data)
-  print('sample_every_n_visits', sample_every_n_visits)
+  print('sample_difficulty_every_n_visits', sample_difficulty_every_n_visits)
   current_loss = 0
   for idx,training_item in enumerate(all_training_items):
     (category,category_tensor, line_tensor) = training_item
@@ -168,7 +173,7 @@ for sample_difficulty_every_n_visits in range(1, 11):
     #    #current_loss = 0
   #rnn.zero_grad()
   all_losses.append(current_loss / plot_every)
-  save_model(model, criterion, epoch, current_loss, 'model_attention_nohistory_fulldata_nhidden512_sample_difficulty_every_n_visits_' + str(sample_every_n_visits) + '_v10_epoch' + str(epoch) + '.pt')
+  save_model(model, criterion, epoch, current_loss, outfile)
 
 
 
