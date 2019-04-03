@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 432fbf7f746e05c4180af6d3c3bf6f06
+# md5: 7bad8bc2d74e5b7c0d8cdb4d0cdc73a5
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -10,6 +10,9 @@ from memoize import memoize
 import copy
 import importlib
 from os import path
+import os
+import torch
+import torch.nn as nn
 
 
 
@@ -216,7 +219,8 @@ def get_enabled_features_list_from_parameter_info_list(parameter_info_list):
 def get_data_for_parameters(parameter_info_list):
   dataparams = get_parameter_map_for_type(parameter_info_list, 'dataparam')
   enabled_feature_list = get_enabled_features_list_from_parameter_info_list(parameter_info_list)
-  all_data_tensors = make_tensors_from_features(features, parameters)
+  dataparams['enabled_feature_list'] = enabled_feature_list
+  all_data_tensors = make_tensors_from_features(get_all_features_data(), dataparams)
   return split_into_train_dev_test(all_data_tensors) # training,dev,test
 
 def get_model_for_parameter_map(model_params):
@@ -231,6 +235,11 @@ def get_model_for_parameters(parameter_info_list):
   #enabled_feature_list = get_enabled_features_list_from_parameter_info_list(parameter_info_list)
   #num_features = get_num_features(enabled_feature_list)
   return get_model_for_parameter_map(model_params)
+
+def get_parameter_value_for_info_list(parameter_info_list, parameter_name):
+  for parameter_info in parameter_info_list:
+    if parameter_info['name'] == parameter_name:
+      return parameter_info['value']
 
 #get_parameter_map_for_type(sample_random_parameters(['difficulty']), 'dataparam')
 #get_all_data_for_parameters(sample_random_parameters(['difficulty']))
@@ -263,7 +272,7 @@ def save_model(model, criterion, epoch, loss, filename):
   }, filename)
 
 
-def train_transformer(model, criterion, category_tensor, line_tensor):
+def train_transformer(model, criterion, category_tensor, line_tensor, learning_rate):
     
     model.zero_grad()
     
@@ -342,6 +351,13 @@ def evaluate_model_on_dataset(model, dataset, prefix='dev_'):
 
 
 
+import hashlib
+import base64
+import arrow
+
+def convert_string_to_hash(word):
+    return hashlib.sha1(word.encode('utf-8')).hexdigest()
+
 def get_path_for_parameters(parameter_info_list):
   output = []
   for parameter_info in parameter_info_list:
@@ -350,19 +366,19 @@ def get_path_for_parameters(parameter_info_list):
     output.append("'".join([name, str(value)]))
   return ' '.join(output)
 
-def train_one_epoch(model, criterion, train_data):
+def train_one_epoch(model, criterion, learning_rate, train_data):
   total_loss = 0
   confusion = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
   correct = 0
   total = 0
-  for idx,training_item in enumerate(train_data):
+  for idx,item in enumerate(train_data):
     category_tensor = item['category']
     line_tensor = item['feature']
     category = tensor_to_difficulty(item['category'])
     category_i = get_difficulty_idx(category)
     if line_tensor.size()[0] == 0:
       continue
-    output,loss = train_transformer(model, criterion, category_tensor, line_tensor.permute(1,0,2))
+    output,loss = train_transformer(model, criterion, category_tensor, line_tensor.permute(1,0,2), learning_rate)
     total_loss += loss
     guess = prediction_to_difficulty(output)
     guess_i = get_difficulty_idx(guess)
@@ -378,38 +394,72 @@ def train_one_epoch(model, criterion, train_data):
   }
 
 def train_model_for_parameters(parameter_info_list, num_epochs=10):
-  base_path = get_path_for_parameters(parameter_info_list)
+  base_path_full = get_path_for_parameters(parameter_info_list)
+  base_path = 'tm_' + convert_string_to_hash(base_path_full)
   if path.exists(base_path):
     # todo check status file and resume training
     return
   else:
-    path.mkdir(base_path)
+    os.mkdir(base_path)
+  json.dump({'base_path': base_path}, open('current.json', 'w'))
   status_info = {
     'status': 'training',
     'epoch': 0,
+    'base_path': base_path,
+    'base_path_full': base_path_full,
+    'dataset_name': dataset_name,
+    'start_time': str(arrow.get()),
+    'start_timestamp': arrow.get().timestamp,
   }
+  print(base_path)
   json.dump(parameter_info_list, open(path.join(base_path, 'parameters.json'), 'w'))
   model = get_model_for_parameters(parameter_info_list)
+  learning_rate = get_parameter_value_for_info_list(parameter_info_list, 'learning_rate')
   train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
   criterion = nn.NLLLoss()
   for epoch in range(1, 1 + num_epochs):
     status_info['epoch'] = epoch
     json.dump(status_info, open(path.join(base_path, 'status.json'), 'w'))
+    print(status_info)
+    epoch_start_time = str(arrow.get())
+    epoch_start_timestamp = arrow.get().timestamp
     model_path = path.join(base_path, 'model_' + str(epoch) + '.pt')
     if path.exists(model_path):
       continue
-    train_info = train_one_epoch(model, criterion, train_data)
-    save_model(model, criterion, epoch, current_loss, model_path)
+    train_info = train_one_epoch(model, criterion, learning_rate, train_data)
+    save_model(model, criterion, epoch, train_info['train_loss'], model_path)
     dev_info = evaluate_model_on_dataset(model, dev_data, 'dev_')
     test_info = evaluate_model_on_dataset(model, test_data, 'test_')
     for k,v in dev_info.items():
       train_info[k] = v
     for k,v in test_info.items():
       train_info[k] = v
+    train_info['epoch_start_time'] = epoch_start_time
+    train_info['epoch_start_timestamp'] = epoch_start_timestamp
+    train_info['epoch_end_time'] = str(arrow.get())
+    train_info['epoch_end_timestamp'] = arrow.get().timestamp
+    training_start_timestamp = arrow.get().timestamp
     info_path = path.join(base_path, 'info_' + str(epoch) + '.json')
-    json.dump(train_info, open(info_path), 'w')
+    json.dump(train_info, open(info_path, 'w'))
   status_info['status'] = 'done'
+  status_info['end_time'] = str(arrow.get())
+  status_info['end_timestamp'] = arrow.get().timestamp
   json.dump(status_info, open(path.join(base_path, 'status.json'), 'w'))
+  print(status_info)
 
 #get_path_for_parameters(sample_random_parameters([]))
+
+
+
+def main():
+  while True:
+    parameters = sample_random_parameters(['learning_rate', 'window_embed_size', 'num_prior_entries'])
+    train_model_for_parameters(parameters)
+    
+
+
+
+#convert_string_to_hash('foobar')
+
+
 
