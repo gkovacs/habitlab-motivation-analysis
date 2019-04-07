@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 7bad8bc2d74e5b7c0d8cdb4d0cdc73a5
+# md5: d809ff8d6e74fa054b236f14b665ca78
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -104,17 +104,17 @@ def get_parameter_info_list():
     {
       'name': 'disable_prior_visit_history',
       'type': 'dataparam',
-      'values': [True, False],
+      'values': [False, True],
     },
     {
       'name': 'disable_difficulty_history',
       'type': 'dataparam',
-      'values': [True, False],
+      'values': [False, True],
     },
     {
       'name': 'enable_current_difficulty',
       'type': 'dataparam',
-      'values': [True, False],
+      'values': [False, True],
     },
   ]
   return output
@@ -393,7 +393,7 @@ def train_one_epoch(model, criterion, learning_rate, train_data):
     'train_confusion': confusion,
   }
 
-def train_model_for_parameters(parameter_info_list, num_epochs=10):
+def train_model_for_parameters(parameter_info_list, num_epochs=3):
   base_path_full = get_path_for_parameters(parameter_info_list)
   base_path = 'tm_' + convert_string_to_hash(base_path_full)
   if path.exists(base_path):
