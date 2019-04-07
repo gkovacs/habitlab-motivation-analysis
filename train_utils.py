@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: d809ff8d6e74fa054b236f14b665ca78
+# md5: c32c1b75248c45599c90e8161181765a
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -44,12 +44,12 @@ def get_parameter_info_list():
     {
       'name': 'learning_rate',
       'type': 'model',
-      'values': [0.005, 0.05, 0.0005, 0.00005],
+      'values': [0.00005, 0.005, 0.05, 0.0005],
     },
     {
       'name': 'window_embed_size',
       'type': 'model',
-      'values': [64, 128, 256, 512],
+      'values': [256, 64, 128, 512],
     },
     {
       'name': 'difficulty',
@@ -94,12 +94,12 @@ def get_parameter_info_list():
     {
       'name': 'sample_every_n_visits',
       'type': 'dataparam',
-      'values': [1],
+      'values': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32, 64, 128, 256, 512],
     },
     {
       'name': 'sample_difficulty_every_n_visits',
       'type': 'dataparam',
-      'values': [1],
+      'values': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 16, 32, 64, 128, 256, 512],
     },
     {
       'name': 'disable_prior_visit_history',
