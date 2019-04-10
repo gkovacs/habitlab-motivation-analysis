@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 035cd3642513ed101bb353d44f6a6de7
+# md5: ad3a882f6bd693b6b3dfefdc138f710f
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -15,6 +15,7 @@ import sys
 
 
 from importlib import reload
+from getsecret import getsecret
 
 
 
@@ -26,7 +27,7 @@ from memoize import memoize # pip install memoize2
 #reload(jsonmemo)
 from jsonmemo import set_cache_dirname as set_jsonmemo_cache_dirname
 from jsonmemo import jsonmemo
-set_jsonmemo_cache_dirname('2019_04_01')
+set_jsonmemo_cache_dirname(getsecret('DATA_DUMP'))
 
 
 
@@ -262,7 +263,7 @@ def get_domain_to_productivity_idx():
 
 
 
-history_length = 100
+#history_length = 100
 
 def make_features_for_user(user):
   output = []
@@ -301,8 +302,8 @@ def make_features_for_user(user):
       'arrow_time': arrow_time,
       'idx': idx,
     })
-    if len(prior_entries) > history_length:
-      prior_entries = prior_entries[-history_length:]
+    #if len(prior_entries) > history_length:
+    #  prior_entries = prior_entries[-history_length:]
     idx += 1
   return output
 
@@ -600,7 +601,6 @@ def get_num_features(enabled_features_list: List[str]) -> int:
 
 @memoize
 def make_get_index(enabled_feature_list : List[str]):
-  enabled_features = set(enabled_feature_list)
   current_idx = 0
   feature_name_to_idx = {}
   feature_info_list = get_enabled_feature_info_list(enabled_feature_list)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 6caaa30e456d2ad82e07fcaecf4c2449
+# md5: 13b2691409c7516ccb96f110ab956ace
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -40,14 +40,14 @@ def get_cache_dirname():
 path_to_cache = {} # type: Dict[str, Any]
 
 def jsonmemo(f):
-  if not os.path.isdir(cache_dirname):
-    os.mkdir(cache_dirname)
+  if not os.path.isdir(get_cache_dirname()):
+    os.mkdir(get_cache_dirname())
     print('Created cache directory %s' % os.path.join(os.path.abspath(__file__), get_cache_dirname()))
 
+  funcname = f.__name__
   #cache_filename = f.__module__ + f.__name__ + '.json'
-  cache_filename = f.__name__ + '.json'
+  cache_filename = funcname + '.json'
   cachepath = os.path.join(get_cache_dirname(), cache_filename)
-  memcache = {}
   cache = None
 
   @functools.wraps(f)
@@ -55,7 +55,7 @@ def jsonmemo(f):
     nonlocal cache
     if cache != None:
       return cache
-    cache = path_to_cache.get(cache_filename, None)
+    cache = path_to_cache.get(funcname, None)
     if cache != None:
       return cache
     try:
@@ -64,11 +64,60 @@ def jsonmemo(f):
       return cache
     except Exception as e:
       pass
-    print('performing computation ' + cache_filename)
+    print('performing computation ' + cachepath)
     cache = f()
-    print('done with computation ' + cache_filename)
-    path_to_cache[cache_filename] = cache
+    print('done with computation ' + cachepath)
+    path_to_cache[funcname] = cache
     json.dump(cache, open(cachepath, 'w'), default=encode_custom)
     return cache
   return wrapped
+
+
+
+path_to_cache_1arg = {}
+
+def jsonmemo1arg(f):
+  if not os.path.isdir(get_cache_dirname()):
+    os.mkdir(get_cache_dirname())
+    print('Created cache directory %s' % get_cache_dirname())
+  funcname = f.__name__
+  func_cache_dir = os.path.join(get_cache_dirname(), funcname)
+  if not os.path.isdir(func_cache_dir):
+    os.mkdir(func_cache_dir)
+    print('Created cache directory %s' % func_cache_dir)
+  
+  if funcname in path_to_cache_1arg:
+    cache = path_to_cache_1arg[funcname]
+  else:
+    cache = {}
+    path_to_cache_1arg[funcname] = cache
+  
+  @functools.wraps(f)
+  def wrapped(arg1):
+    nonlocal cache
+    val = cache.get(arg1, None)
+    if val != None:
+      return val
+    cachepath = os.path.join(func_cache_dir, str(arg1) + '.json')
+    try:
+      cache = json.load(open(cachepath), object_hook=decode_custom)
+      path_to_cache_1arg[funcname][arg1] = cache
+      return cache
+    except Exception as e:
+      pass
+    print('performing computation ' + cachepath + ' for arg ' + str(arg1))
+    cache = f(arg1)
+    print('done with computation ' + cachepath)
+    path_to_cache_1arg[funcname][arg1] = cache
+    json.dump(cache, open(cachepath, 'w'), default=encode_custom)
+    return cache
+  return wrapped
+
+
+
+@jsonmemo1arg
+def foobar(x):
+  return x+2
+
+foobar(6)
 

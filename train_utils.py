@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c32c1b75248c45599c90e8161181765a
+# md5: 94a2677c457f687f50cd58b39b996a5b
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -20,7 +20,8 @@ from mkdata import *
 
 
 
-dataset_name = '2019_04_01'
+from getsecret import getsecret
+dataset_name = getsecret('DATA_DUMP') #'2019_04_01'
 
 
 
