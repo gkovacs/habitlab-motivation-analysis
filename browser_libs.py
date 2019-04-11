@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c976d7125176410b038c8d15c8f971a7
+# md5: 412bf5291b761f54adb53827050cc6a5
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -21,6 +21,14 @@ import urllib.parse
 import moment
 import datetime
 import pandas as pd
+
+
+
+import jsonmemo as jsonmemo_module
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+jsonmemo = jsonmemo_funcs['jsonmemo']
+mparrmemo = jsonmemo_funcs['mparrmemo']
 
 
 
@@ -87,7 +95,7 @@ def get_db(): # this is for the browser
   db = client[getsecret("DB_NAME")]
   return db
 
-@memoize
+@jsonmemo1arg
 def get_collection_items(collection_name):
   db = get_db()
   return [x for x in db[collection_name].find({})]

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 9fa1345f1da52c48f945561c88fd1ee3
+# md5: 09c2633c9614038b9b046990ae77188a
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -32,6 +32,7 @@ import jsonmemo as jsonmemo_module
 jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
 jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
 jsonmemo = jsonmemo_funcs['jsonmemo']
+mparrmemo = jsonmemo_funcs['mparrmemo']
 
 
 
@@ -72,7 +73,15 @@ from browser_libs import get_collection_items, get_collection_names, get_collect
 
 
 
-@memoize
+
+
+
+
+@jsonmemo
+def get_users():
+  return get_users_with_choose_difficulty()
+
+@jsonmemo
 def get_user_to_install_logs():
   installs_collection = get_collection_items('installs')
   output = {}
@@ -99,7 +108,11 @@ def get_languages_for_user(user):
 
 
 
-@memoize
+#print(get_language_list())
+
+
+
+@jsonmemo
 def get_language_list():
   user_list = get_users()
   output = set()
@@ -313,11 +326,11 @@ def make_features_for_user(user):
 
 
 
-@jsonmemo
-def get_users():
-  return get_users_with_choose_difficulty()
 
-@jsonmemo
+
+
+
+@mparrmemo
 def get_all_features_data():
   all_features_data = []
   for user in get_users():
@@ -327,6 +340,10 @@ def get_all_features_data():
     for features in feature_list:
       all_features_data.append(features)
   return all_features_data
+
+
+
+#print(len(get_users()))
 
 
 
@@ -739,6 +756,7 @@ def sample_prior_visits_every_n_visits(l, n):
 
 # todo attach a num_prior_entries entry. so that we only use that many prior entries
 def make_tensors_from_features_v7(features, parameters):
+  print('running make_tensors_from_features')
   enabled_feature_list = parameters['enabled_feature_list']
   num_prior_entries = parameters.get('num_prior_entries', 10)
   sample_every_n_visits = parameters.get('sample_every_n_visits', 1)
@@ -747,7 +765,8 @@ def make_tensors_from_features_v7(features, parameters):
   disable_difficulty_history = parameters.get('disable_difficulty_history', False)
   enable_current_difficulty = parameters.get('enable_current_difficulty', False)
   output = []
-  for feature in features:
+  for featurenum,feature in enumerate(features):
+    #print(featurenum, 'of', len(features))
     #url = feature['url']
     #domain_productivity_idx,have_productivity_idx,domain_category_idx,have_category_idx = get_domain_features_from_url(url)
     #hour_idx,weekday_idx = get_time_features_from_arrow(feature['arrow_time'])

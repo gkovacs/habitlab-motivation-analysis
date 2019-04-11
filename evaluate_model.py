@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b7bfa9bf55fa3d41ed7b3e9c12296f28
+# md5: 89ec3820a66fd05506b5fba9c4c1a635
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -129,7 +129,7 @@ for sample_every_n_visits in range(1, 11):
   #  'sample_every_n_visits': sample_every_n_visits,
   #})
   model = SelfAttentionLSTM({'word_embed_size': num_features, 'window_embed_size': 128})
-  model_filename = 'model_attention_nohistory_fractiondata_nhidden512_sample_every_n_visits_' + str(sample_every_n_visits) + '_v10_epoch1.pt'
+  model_filename = 'model_attention_nohistory_fractiondata10_nhidden512_sample_every_n_visits_' + str(sample_every_n_visits) + '_v10_epoch1.pt'
   model_state = torch.load(model_filename)
   model.load_state_dict(model_state['model_state_dict'])
   model.eval()

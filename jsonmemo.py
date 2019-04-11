@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b17a3197b99ede071f14dbe5053c0a46
+# md5: 3ee534085fc4b0b9ba667bac9aef0489
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -13,16 +13,23 @@ except ImportError:
 import arrow
 import json
 import os, functools
-
-def decode_custom(obj):
-  if '__arrow__' in obj:
-    obj = arrow.get(obj['as_str'])
-  return obj
+import msgpack
+import bson
 
 def encode_custom(obj):
   if isinstance(obj, arrow.Arrow):
     return {'__arrow__': True, 'as_str': str(obj)}
+  if isinstance(obj, bson.objectid.ObjectId):
+    return {'__bsonid__': True, 'as_str': str(obj)}
   return obj
+
+def decode_custom(obj):
+  if '__arrow__' in obj:
+    return arrow.get(obj['as_str'])
+  if '__bsonid__' in obj:
+    return bson.objectid.ObjectId(obj['as_str'])
+  return obj
+
 
 # # doesn't work with nested stuff (like dicts in argument lists)
 
@@ -39,8 +46,102 @@ def encode_custom(obj):
 
 
 def create_jsonmemo_funcs(cache_dirname):
-  path_to_cache = {} # type: Dict[str, Any]
+  
+  path_to_cache_mparr = {} # type: Dict[str, Any]
+  def mparrmemo(f):
+    if not os.path.isdir(cache_dirname):
+      os.mkdir(cache_dirname)
+      print('Created cache directory %s' % os.path.join(os.path.abspath(__file__), cache_dirname))
 
+    funcname = f.__name__
+    #cache_filename = f.__module__ + f.__name__ + '.json'
+    cache_filename = funcname + '.mparr'
+    cachepath = os.path.join(cache_dirname, cache_filename)
+    cache = None
+
+    @functools.wraps(f)
+    def wrapped():
+      nonlocal cache
+      if cache != None:
+        #for x in cache:
+        #  yield cache
+        #return
+        return cache
+      cache = path_to_cache_mparr.get(funcname, None)
+      if cache != None:
+        #for x in cache:
+        #  yield cache
+        #return
+        return cache
+      try:
+        cache = []
+        unpacker = msgpack.Unpacker(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
+        for unpacked in unpacker:
+          cache.append(unpacked)
+          #yield unpacked
+        #cache = json.load(open(cachepath), object_hook=decode_custom)
+        path_to_cache_mparr[funcname] = cache
+        return cache
+      except Exception as e:
+        print('exception in mparrmemo for file ' + cachepath)
+        print(e)
+        pass
+      print('performing computation ' + cachepath)
+      #cache = f()
+      cache = []
+      outfile = open(cachepath + '.tmp', 'wb')
+      for line in f():
+        cache.append(line)
+        outfile.write(msgpack.packb(line, default=encode_custom))
+      outfile.flush()
+      outfile.close()
+      os.replace(cachepath + '.tmp', cachepath)
+      print('done with computation ' + cachepath)
+      path_to_cache_mparr[funcname] = cache
+      #json.dump(cache, open(cachepath, 'w'), default=encode_custom)
+      #return cache
+      #for line in cache:
+      #  yield line
+      return cache
+    return wrapped
+
+  path_to_cache_msgpackmemo = {} # type: Dict[str, Any]
+  def msgpackmemo(f):
+    if not os.path.isdir(cache_dirname):
+      os.mkdir(cache_dirname)
+      print('Created cache directory %s' % os.path.join(os.path.abspath(__file__), cache_dirname))
+
+    funcname = f.__name__
+    #cache_filename = f.__module__ + f.__name__ + '.json'
+    cache_filename = funcname + '.msgpack'
+    cachepath = os.path.join(cache_dirname, cache_filename)
+    cache = None
+
+    @functools.wraps(f)
+    def wrapped():
+      nonlocal cache
+      if cache != None:
+        return cache
+      cache = path_to_cache_msgpackmemo.get(funcname, None)
+      if cache != None:
+        return cache
+      try:
+        cache = msgpack.load(open(cachepath), object_hook=decode_custom)
+        path_to_cache_msgpackmemo[funcname] = cache
+        return cache
+      except Exception as e:
+        print('exception in msgpackmemo for file ' + cachepath)
+        print(e)
+        pass
+      print('performing computation ' + cachepath)
+      cache = f()
+      print('done with computation ' + cachepath)
+      path_to_cache_msgpackmemo[funcname] = cache
+      msgpack.dump(cache, open(cachepath, 'w'), default=encode_custom)
+      return cache
+    return wrapped
+  
+  path_to_cache = {} # type: Dict[str, Any]
   def jsonmemo(f):
     if not os.path.isdir(cache_dirname):
       os.mkdir(cache_dirname)
@@ -62,7 +163,7 @@ def create_jsonmemo_funcs(cache_dirname):
         return cache
       try:
         cache = json.load(open(cachepath), object_hook=decode_custom)
-        path_to_cache[cache_filename] = cache
+        path_to_cache[funcname] = cache
         return cache
       except Exception as e:
         print('exception in jsonmemo for file ' + cachepath)
@@ -102,24 +203,26 @@ def create_jsonmemo_funcs(cache_dirname):
         return val
       cachepath = os.path.join(func_cache_dir, str(arg1) + '.json')
       try:
-        cache = json.load(open(cachepath), object_hook=decode_custom)
-        path_to_cache_1arg[funcname][arg1] = cache
+        cacheitem = json.load(open(cachepath), object_hook=decode_custom)
+        path_to_cache_1arg[funcname][arg1] = cacheitem
         return cache
       except Exception as e:
         print('exception in jsonmemo1arg for file ' + cachepath)
         print(e)
         pass
       print('performing computation ' + cachepath + ' for arg ' + str(arg1))
-      cache = f(arg1)
+      cacheitem = f(arg1)
       print('done with computation ' + cachepath)
-      path_to_cache_1arg[funcname][arg1] = cache
-      json.dump(cache, open(cachepath, 'w'), default=encode_custom)
+      path_to_cache_1arg[funcname][arg1] = cacheitem
+      json.dump(cacheitem, open(cachepath, 'w'), default=encode_custom)
       return cache
     return wrapped
   
   return {
     'jsonmemo': jsonmemo,
     'jsonmemo1arg': jsonmemo1arg,
+    'mparrmemo': mparrmemo,
+    'msgpackmemo': msgpackmemo,
   }
 
 
@@ -128,11 +231,72 @@ def create_jsonmemo_funcs(cache_dirname):
 
 
 
-# jsonmemo1arg = create_jsonmemo_funcs('somedir')['jsonmemo1arg']
+# from getsecret import getsecret
+# jsonmemo_funcs = create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+# jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+# jsonmemo = jsonmemo_funcs['jsonmemo']
+# mparrmemo = jsonmemo_funcs['mparrmemo']
 
-# @jsonmemo1arg
-# def foobar(x):
-#   return x+2
 
-# foobar(6)
+
+# @mparrmemo
+# def get_all_features_data():
+#   print('get all features data should not be running')
+#   return []
+
+
+
+# print(get_all_features_data())
+
+
+
+# cache = []
+# print('unpacker not yet started')
+# unpacker = msgpack.Unpacker(open('2019_04_08/get_all_features_data.mparr', 'rb'), raw=False, object_hook=decode_custom)
+# print('unpacker started')
+# print(type(unpacker))
+# for unpacked in unpacker:
+#   print(unpacked)
+#   break
+#   cache.append(unpacked)
+#   #yield unpacked
+# print('unpacker finished')
+
+
+
+# import msgpack
+
+# print('getting data_to_dump')
+# data_to_dump = msgpack.load(open('2019_04_08/get_all_features_data.msgpack', 'rb'))
+
+# print('starting to write outfile')
+# outfile = open('2019_04_08/get_all_features_data_v2.mparr', 'wb')
+# for line in data_to_dump:
+#   outfile.write(msgpack.packb(line))
+#   #outfile.write(msgpack.packb(line, use_bin_type=True)) #, default=encode_custom))
+# print('flushing')
+# outfile.flush()
+# outfile.close()
+# print('done')
+# #outfile.write()
+
+
+
+# unpacker = msgpack.Unpacker(open('2019_04_08/get_all_features_data.mparr', 'rb'), raw=False, object_hook=decode_custom) #, encoding='utf8')#, object_hook=decode_custom_msgpack)
+# for unpacked in unpacker:
+#   print(unpacked)
+#   #print(json.loads(json.dumps(unpacked)))
+#   break
+
+
+
+
+
+
+
+
+
+
+
+
 
