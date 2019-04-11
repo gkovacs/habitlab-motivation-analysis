@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 2240b6a05a737013537e822bce3c53f0
+# md5: a21afbb0948dd92a1e9c80050e0df7fd
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -19,7 +19,10 @@ import json
 
 
 
-#print(get_models_currently_training())
+import jsonmemo as jsonmemo_module
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+jsonmemo = jsonmemo_funcs['jsonmemo']
 
 
 
@@ -327,70 +330,132 @@ def evaluate_baseline_model_on_dataset(parameter_info_list, dataset, prefix='dev
 
 
 
-every_n_visits_to_dev_evaluation_results : Dict[int, Dict[str, Any]] = {}
-every_n_visits_to_train_evaluation_results : Dict[int, Dict[str, Any]] = {}
+# every_n_visits_to_dev_evaluation_results : Dict[int, Dict[str, Any]] = {}
+# every_n_visits_to_train_evaluation_results : Dict[int, Dict[str, Any]] = {}
 
 
 
-true = True
-false = False
-parameter_info_list : List[Dict[str, Any]] = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_01"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
-train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
+# true = True
+# false = False
+# parameter_info_list : List[Dict[str, Any]] = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_01"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
+# train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
 
 
 
-initial_difficulty_stats = evaluate_function_model_on_dataset(parameter_info_list, get_initial_difficulty, dev_data)
-print(initial_difficulty_stats)
+# initial_difficulty_stats = evaluate_function_model_on_dataset(parameter_info_list, get_initial_difficulty, dev_data)
+# print(initial_difficulty_stats)
 
 
 
-first_chosen_difficulty_stats = evaluate_function_model_on_dataset(parameter_info_list, get_first_chosen_difficulty, dev_data)
-print(first_chosen_difficulty_stats)
+# first_chosen_difficulty_stats = evaluate_function_model_on_dataset(parameter_info_list, get_first_chosen_difficulty, dev_data)
+# print(first_chosen_difficulty_stats)
 
 
 
-always_nothing_stats = evaluate_function_model_on_dataset(parameter_info_list, always_predict_nothing, dev_data)
-print(always_nothing_stats)
+# always_nothing_stats = evaluate_function_model_on_dataset(parameter_info_list, always_predict_nothing, dev_data)
+# print(always_nothing_stats)
 
 
 
-most_common_previous_stats = evaluate_function_model_on_dataset(parameter_info_list, always_predict_most_common_previous, dev_data)
-print(most_common_previous_stats)
+#most_common_previous_stats = evaluate_function_model_on_dataset(parameter_info_list, always_predict_most_common_previous, dev_data)
+#print(most_common_previous_stats)
 
 
 
-baseline_name_to_stats : Dict[str, Dict[str, Any]] = {}
-name_and_func : List[Tuple[str, Any]] = [
-  ('initial_difficulty', get_initial_difficulty),
-  ('first_chosen', get_first_chosen_difficulty),
-  ('always_nothing', always_predict_nothing),
-  ('most_common_previous', always_predict_most_common_previous),
-]
-for [baseline_name,baseline_func] in name_and_func:
-  baseline_name_to_stats[baseline_name] = evaluate_function_model_on_dataset(parameter_info_list, baseline_func, dev_data)
-
-
-
-sample_every_n_visits_options : List[int] = list(range(1, 1000))
-
-true = True
-false = False
-for sample_every_n_visits in sample_every_n_visits_options:
-  if sample_every_n_visits in every_n_visits_to_dev_evaluation_results:
-    continue
-  parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_01"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
-  for parameter_info in parameter_info_list:
-    if parameter_info['name'] == 'sample_every_n_visits':
-      parameter_info['values'] = [sample_every_n_visits]
-      parameter_info['value'] = sample_every_n_visits
+@jsonmemo1arg
+def get_evaluation_results_for_named_baseline(baseline_name):
+  baseline_name_to_func = {
+    'initial_difficulty': get_initial_difficulty,
+    'first_chosen': get_first_chosen_difficulty,
+    'always_nothing': always_predict_nothing,
+    'most_common_previous': always_predict_most_common_previous,
+  }
+  true = True
+  false = False
+  parameter_info_list : List[Dict[str, Any]] = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_01"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
   train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
-  print(sample_every_n_visits)
+  baseline_func = baseline_name_to_func[baseline_name]
+  return evaluate_function_model_on_dataset(parameter_info_list, baseline_func, dev_data)
+
+
+
+
+
+
+
+# baseline_name_to_stats : Dict[str, Dict[str, Any]] = {}
+# name_and_func : List[Tuple[str, Any]] = [
+#   ('initial_difficulty', get_initial_difficulty),
+#   ('first_chosen', get_first_chosen_difficulty),
+#   ('always_nothing', always_predict_nothing),
+#   ('most_common_previous', always_predict_most_common_previous),
+# ]
+# for [baseline_name,baseline_func] in name_and_func:
+#   baseline_name_to_stats[baseline_name] = evaluate_function_model_on_dataset(parameter_info_list, baseline_func, dev_data)
+
+
+
+#print(len(get_users()))
+
+
+
+
+
+
+
+#print(len(get_all_features_data()))
+
+
+
+def set_parameter_in_parameter_info_list(parameter_info_list, parameter_name, parameter_value):
+  for parameter_info in parameter_info_list:
+    if parameter_info['name'] == parameter_name:
+      parameter_info['values'] = [parameter_value]
+      parameter_info['value'] = parameter_value
+
+@jsonmemo1arg
+def get_evaluation_results_for_sample_every_n_visits(sample_every_n_visits):
+  parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_08"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
+  set_parameter_in_parameter_info_list(parameter_info_list, 'sample_every_n_visits', sample_every_n_visits)
+  train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
   evaluation_results = evaluate_baseline_model_on_dataset(parameter_info_list, dev_data)
-  every_n_visits_to_dev_evaluation_results[sample_every_n_visits] = evaluation_results
-  print(evaluation_results)
-  #evaluation_results = evaluate_baseline_model_on_dataset(parameter_info_list, train_data)
-  #every_n_visits_to_train_evaluation_results[sample_every_n_visits] = evaluation_results
-  #print(evaluation_results)
+  return evaluation_results
+
+def main():
+  for baseline_name in ['initial_difficulty', 'first_chosen', 'always_nothing', 'most_common_previous']:
+    print(baseline_name)
+    print(get_evaluation_results_for_named_baseline(baseline_name))
+  
+  sample_every_n_visits_options : List[int] = list(range(1, 1000))
+  for sample_every_n_visits in sample_every_n_visits_options:
+    print(sample_every_n_visits)
+    print(get_evaluation_results_for_sample_every_n_visits(sample_every_n_visits))
+
+
+main()
+
+
+
+# sample_every_n_visits_options : List[int] = list(range(1, 1000))
+
+# true = True
+# false = False
+# for sample_every_n_visits in sample_every_n_visits_options:
+#   if sample_every_n_visits in every_n_visits_to_dev_evaluation_results:
+#     continue
+#   parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_08"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
+#   for parameter_info in parameter_info_list:
+#     if parameter_info['name'] == 'sample_every_n_visits':
+#       parameter_info['values'] = [sample_every_n_visits]
+#       parameter_info['value'] = sample_every_n_visits
+#   train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
+#   print(sample_every_n_visits)
+#   evaluation_results = evaluate_baseline_model_on_dataset(parameter_info_list, dev_data)
+#   every_n_visits_to_dev_evaluation_results[sample_every_n_visits] = evaluation_results
+#   print(evaluation_results)
+#   #evaluation_results = evaluate_baseline_model_on_dataset(parameter_info_list, train_data)
+#   #every_n_visits_to_train_evaluation_results[sample_every_n_visits] = evaluation_results
+#   #print(evaluation_results)
 
 
 

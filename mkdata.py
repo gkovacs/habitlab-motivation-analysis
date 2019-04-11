@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: ad3a882f6bd693b6b3dfefdc138f710f
+# md5: 9fa1345f1da52c48f945561c88fd1ee3
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -25,9 +25,13 @@ from memoize import memoize # pip install memoize2
 #from diskmemo import diskmemo
 #import jsonmemo
 #reload(jsonmemo)
-from jsonmemo import set_cache_dirname as set_jsonmemo_cache_dirname
-from jsonmemo import jsonmemo
-set_jsonmemo_cache_dirname(getsecret('DATA_DUMP'))
+#from jsonmemo import set_cache_dirname as set_jsonmemo_cache_dirname
+#from jsonmemo import jsonmemo
+#set_jsonmemo_cache_dirname(getsecret('DATA_DUMP'))
+import jsonmemo as jsonmemo_module
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+jsonmemo = jsonmemo_funcs['jsonmemo']
 
 
 
