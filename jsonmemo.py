@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 3ee534085fc4b0b9ba667bac9aef0489
+# md5: a1634b0aee4bd689e8b37df913ace5a0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -215,7 +215,7 @@ def create_jsonmemo_funcs(cache_dirname):
       print('done with computation ' + cachepath)
       path_to_cache_1arg[funcname][arg1] = cacheitem
       json.dump(cacheitem, open(cachepath, 'w'), default=encode_custom)
-      return cache
+      return cacheitem
     return wrapped
   
   return {
