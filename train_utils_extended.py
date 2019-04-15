@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: bd688538dc43d3d971df6c1c6284682e
+# md5: da0fb40fdeffd1fccfd94fbe0bf245dd
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -95,7 +95,8 @@ def train_model_for_parameters(parameter_info_list, num_epochs=3):
 def main():
   while True:
     #parameters = sample_random_parameters(['learning_rate', 'window_embed_size', 'num_prior_entries'])
-    parameters = sample_random_parameters(['sample_difficulty_every_n_visits'])
+    #parameters = sample_random_parameters(['sample_difficulty_every_n_visits'])
+    parameters = sample_random_parameters(['window_embed_size', 'num_prior_entries'])
     train_model_for_parameters(parameters)
     parameters = sample_random_parameters(['sample_every_n_visits'])
     train_model_for_parameters(parameters)

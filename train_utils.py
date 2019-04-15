@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: e66dace57158d236ec2651b9d40b33de
+# md5: 102cf8b132b08b9116aa22b36e32f722
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -7,7 +7,6 @@
 
 import random
 from memoize import memoize
-import copy
 import importlib
 from os import path
 import os
@@ -224,7 +223,11 @@ def get_data_for_parameters(parameter_info_list):
   dataparams['enabled_feature_list'] = enabled_feature_list
   print('running get_all_features_data')
   all_features_data = get_all_features_data()
+  print('all_features_data is')
+  print(type(all_features_data))
   all_data_tensors = make_tensors_from_features(all_features_data, dataparams)
+  print('all_data_tensors is')
+  print(type(all_data_tensors))
   print('running split_into_train_dev_test')
   return split_into_train_dev_test(all_data_tensors) # training,dev,test
 

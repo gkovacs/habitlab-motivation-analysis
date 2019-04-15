@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: a1634b0aee4bd689e8b37df913ace5a0
+# md5: 3279b2c32e85c81974506d27ef614969
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -126,18 +126,16 @@ def create_jsonmemo_funcs(cache_dirname):
       if cache != None:
         return cache
       try:
-        cache = msgpack.load(open(cachepath), object_hook=decode_custom)
+        cache = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
         path_to_cache_msgpackmemo[funcname] = cache
         return cache
       except Exception as e:
         print('exception in msgpackmemo for file ' + cachepath)
         print(e)
         pass
-      print('performing computation ' + cachepath)
       cache = f()
-      print('done with computation ' + cachepath)
       path_to_cache_msgpackmemo[funcname] = cache
-      msgpack.dump(cache, open(cachepath, 'w'), default=encode_custom)
+      msgpack.dump(cache, open(cachepath, 'wb'), default=encode_custom)
       return cache
     return wrapped
   
@@ -162,7 +160,7 @@ def create_jsonmemo_funcs(cache_dirname):
       if cache != None:
         return cache
       try:
-        cache = json.load(open(cachepath), object_hook=decode_custom)
+        cache = json.load(open(cachepath, 'rt'), object_hook=decode_custom)
         path_to_cache[funcname] = cache
         return cache
       except Exception as e:
@@ -173,7 +171,7 @@ def create_jsonmemo_funcs(cache_dirname):
       cache = f()
       print('done with computation ' + cachepath)
       path_to_cache[funcname] = cache
-      json.dump(cache, open(cachepath, 'w'), default=encode_custom)
+      json.dump(cache, open(cachepath, 'wt'), default=encode_custom)
       return cache
     return wrapped
 
@@ -203,7 +201,7 @@ def create_jsonmemo_funcs(cache_dirname):
         return val
       cachepath = os.path.join(func_cache_dir, str(arg1) + '.json')
       try:
-        cacheitem = json.load(open(cachepath), object_hook=decode_custom)
+        cacheitem = json.load(open(cachepath, 'rt'), object_hook=decode_custom)
         path_to_cache_1arg[funcname][arg1] = cacheitem
         return cache
       except Exception as e:
@@ -214,7 +212,7 @@ def create_jsonmemo_funcs(cache_dirname):
       cacheitem = f(arg1)
       print('done with computation ' + cachepath)
       path_to_cache_1arg[funcname][arg1] = cacheitem
-      json.dump(cacheitem, open(cachepath, 'w'), default=encode_custom)
+      json.dump(cacheitem, open(cachepath, 'wt'), default=encode_custom)
       return cacheitem
     return wrapped
   
