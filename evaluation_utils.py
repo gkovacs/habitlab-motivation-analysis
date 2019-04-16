@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c15ae948ea49cbc835ba9da7af3a7239
+# md5: f64750f5488b3475305d43be641b2a2b
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -439,7 +439,7 @@ def main():
     print(get_evaluation_results_for_sample_every_n_visits(sample_every_n_visits))
 
 
-main()
+#main()
 
 
 
@@ -468,40 +468,18 @@ main()
 
 
 
-scatterplot = []
-for k,v in every_n_visits_to_dev_evaluation_results.items():
-  scatterplot.append([k,v['dev_correct'] / v['dev_total']])
-
-
-
-import plotly.graph_objs as go
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-
-
-
-print(scatterplot)
 
 
 
 
 
-# Create a trace
-trace = go.Scatter(
-    x = [x[0] for x in scatterplot],
-    y = [x[1] for x in scatterplot],
-    mode = 'markers'
-)
-
-data = [trace]
-
-# Plot and embed in ipython notebook!
-iplot(data)
 
 
 
-baseline_name_and_correctness : List[Tuple[str, float]] = []
-for k2,v2 in baseline_name_to_stats.items():
-  correctness : float = float(v2['dev_correct'] / v2['dev_total'])
-  baseline_name_and_correctness.append((k2, correctness))
-print(baseline_name_and_correctness)
+
+
+
+
+
+
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 04736d72ed6938ad5b4c1ded309377a6
+# md5: 558ca5643ec6e0f1e58d07714c7d2b8f
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -942,6 +942,11 @@ def make_tensors_from_features_for_user_v8(user, features, parameters):
     difficulty_item = copy(difficulty_item)
     difficulty_item['idx'] = idx
     difficulty_items.append(difficulty_item)
+  difficulty_items_filtered = []
+  if sample_every_n_visits > 1:
+    difficulty_items_filtered = sample_prior_visits_every_n_visits(difficulty_items, sample_every_n_visits)
+  else:
+    difficulty_items_filtered = difficulty_items
   for visit_idx,difficulty_item in enumerate(difficulty_items):
     history_length_current = min(visit_idx, num_prior_entries)
     category_tensor = make_tensor_from_chosen_difficulty(difficulty_item['difficulty'])
@@ -968,7 +973,7 @@ def make_tensors_from_features_for_user_v8(user, features, parameters):
       #  prior_entry = copy(prior_entry)
       #  prior_entry['idx'] = idx
       #  prior_entries.append(prior_entry)
-      for idx,prior_entry in enumerate(difficulty_items[-history_length_current*sample_every_n_visits : visit_idx : sample_every_n_visits]):
+      for idx,prior_entry in enumerate(difficulty_items[visit_idx - (history_length_current*sample_every_n_visits) : visit_idx : sample_every_n_visits]):
         if (not disable_difficulty_history) and ((prior_entry['idx'] % sample_difficulty_every_n_visits) == 0):
           f(idx, 'difficulty', prior_entry['difficulty'])
         f(idx, 'initial_difficulty', features['initial_difficulty'])
@@ -978,7 +983,7 @@ def make_tensors_from_features_for_user_v8(user, features, parameters):
         f(idx, 'day_of_week', prior_entry['arrow_time'])
         f(idx, 'domain_productivity', prior_entry['url'])
         f(idx, 'domain_category', prior_entry['url'])
-    output.append({'user': user, 'chosen_difficulty': difficulty_item['difficulty'], 'category': category_tensor, 'feature': feature_tensor})
+    output.append({'user': user, 'visit_idx': visit_idx, 'chosen_difficulty': difficulty_item['difficulty'], 'category': category_tensor, 'feature': feature_tensor})
   return output
 
 # import time
