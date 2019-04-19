@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 3279b2c32e85c81974506d27ef614969
+# md5: c38e8ab2ef311860e1bc063c0d5f2046
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -203,7 +203,7 @@ def create_jsonmemo_funcs(cache_dirname):
       try:
         cacheitem = json.load(open(cachepath, 'rt'), object_hook=decode_custom)
         path_to_cache_1arg[funcname][arg1] = cacheitem
-        return cache
+        return cacheitem
       except Exception as e:
         print('exception in jsonmemo1arg for file ' + cachepath)
         print(e)
