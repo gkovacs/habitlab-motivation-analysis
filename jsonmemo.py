@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c38e8ab2ef311860e1bc063c0d5f2046
+# md5: 1e038e970109573e271b53d159ab8cc0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -215,12 +215,100 @@ def create_jsonmemo_funcs(cache_dirname):
       json.dump(cacheitem, open(cachepath, 'wt'), default=encode_custom)
       return cacheitem
     return wrapped
+
+  path_to_cache_msgpack1arg = {} # type: Dict[str, Dict[Any, Any]]
+  
+  def msgpackmemo1arg(f):
+    if not os.path.isdir(cache_dirname):
+      os.mkdir(cache_dirname)
+      print('Created cache directory %s' % cache_dirname)
+    funcname = f.__name__
+    func_cache_dir = os.path.join(cache_dirname, funcname)
+    if not os.path.isdir(func_cache_dir):
+      os.mkdir(func_cache_dir)
+      print('Created cache directory %s' % func_cache_dir)
+
+    if funcname in path_to_cache_msgpack1arg:
+      cache = path_to_cache_msgpack1arg[funcname]
+    else:
+      cache = {}
+      path_to_cache_msgpack1arg[funcname] = cache
+
+    @functools.wraps(f)
+    def wrapped(arg1):
+      nonlocal cache
+      val = cache.get(arg1, None)
+      if val != None:
+        return val
+      cachepath = os.path.join(func_cache_dir, str(arg1) + '.msgpack')
+      try:
+        cacheitem = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
+        path_to_cache_msgpack1arg[funcname][arg1] = cacheitem
+        return cacheitem
+      except Exception as e:
+        print('exception in msgpackmemo1arg for file ' + cachepath)
+        print(e)
+        pass
+      print('performing computation ' + cachepath + ' for arg ' + str(arg1))
+      cacheitem = f(arg1)
+      print('done with computation ' + cachepath)
+      path_to_cache_msgpack1arg[funcname][arg1] = cacheitem
+      msgpack.dump(cacheitem, open(cachepath, 'wb'), default=encode_custom)
+      return cacheitem
+    return wrapped
+  
+  path_to_cache_msgpack2arg = {} # type: Dict[str, Dict[Any, Dict[Any, Any]]]
+  
+  def msgpackmemo2arg(f):
+    if not os.path.isdir(cache_dirname):
+      os.mkdir(cache_dirname)
+      print('Created cache directory %s' % cache_dirname)
+    funcname = f.__name__
+    func_cache_dir = os.path.join(cache_dirname, funcname)
+    if not os.path.isdir(func_cache_dir):
+      os.mkdir(func_cache_dir)
+      print('Created cache directory %s' % func_cache_dir)
+
+    if funcname in path_to_cache_msgpack2arg:
+      cache = path_to_cache_msgpack2arg[funcname]
+    else:
+      cache = {}
+      path_to_cache_msgpack2arg[funcname] = cache
+
+    @functools.wraps(f)
+    def wrapped(arg1, arg2):
+      nonlocal cache
+      val = cache.get(arg1, None)
+      if val != None:
+        return val
+      cachepath = os.path.join(func_cache_dir, str(arg1), str(arg2) + '.msgpack')
+      try:
+        cacheitem = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
+        if arg1 not in path_to_cache_msgpack2arg[funcname]:
+          path_to_cache_msgpack2arg[funcname][arg1] = {}
+        path_to_cache_msgpack2arg[funcname][arg1][arg2] = cacheitem
+        return cacheitem
+      except Exception as e:
+        print('exception in msgpackmemo1arg for file ' + cachepath)
+        print(e)
+        pass
+      print('performing computation ' + cachepath + ' for arg ' + str(arg1))
+      cacheitem = f(arg1, arg2)
+      print('done with computation ' + cachepath)
+      if arg1 not in path_to_cache_msgpack2arg[funcname]:
+        path_to_cache_msgpack2arg[funcname][arg1] = {}
+      path_to_cache_msgpack2arg[funcname][arg1][arg2] = cacheitem
+      msgpack.dump(cacheitem, open(cachepath, 'wb'), default=encode_custom)
+      return cacheitem
+    return wrapped
   
   return {
     'jsonmemo': jsonmemo,
     'jsonmemo1arg': jsonmemo1arg,
     'mparrmemo': mparrmemo,
     'msgpackmemo': msgpackmemo,
+    'msgpackmemo1arg': msgpackmemo1arg,
+    'msgpackmemo2arg': msgpackmemo2arg,
   }
 
 
