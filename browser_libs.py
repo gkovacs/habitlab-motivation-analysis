@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 4d64fd0b43214c983f70d2910276c67e
+# md5: e9dff3adb63c335da83d59c99d47b118
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -25,7 +25,8 @@ import pandas as pd
 
 
 import jsonmemo as jsonmemo_module
-jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'), lowmem=True)
+#jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'), lowmem=True)
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
 jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
 jsonmemo = jsonmemo_funcs['jsonmemo']
 mparrmemo = jsonmemo_funcs['mparrmemo']
@@ -174,12 +175,6 @@ def get_install_id_to_user():
   return output
 
 
-
-print(get_install_id_to_user())
-
-
-
-a=get_user_to_all_install_ids_precise()
 
 
 

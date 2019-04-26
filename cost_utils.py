@@ -1,7 +1,18 @@
 #!/usr/bin/env python
-# md5: 3f62b20a4dea64e4223af5c9227e97c3
+# md5: 63f8af9e7fb4499f293436fd5f701399
 #!/usr/bin/env python
 # coding: utf-8
+
+
+
+import jsonmemo as jsonmemo_module
+#jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'), lowmem=True)
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+jsonmemo = jsonmemo_funcs['jsonmemo']
+mparrmemo = jsonmemo_funcs['mparrmemo']
+msgpackmemo1arg = jsonmemo_funcs['msgpackmemo1arg']
+msgpackmemo = jsonmemo_funcs['msgpackmemo']
 
 
 
@@ -47,9 +58,9 @@ for x in get_collection_names():
 
 for user in get_users():
   user_to_difficulty_items = get_choose_difficulty_items_for_user(user)
-  if len(user_to_difficulty_items) > 0:
-    print(user)
-    break
+  #if len(user_to_difficulty_items) > 0:
+    #print(user)
+    #break
 
 
 
@@ -131,12 +142,19 @@ def append_dict_list(d, value, *dpath):
 
 
 
+from browser_libs import get_user_to_all_install_ids
+
+user_to_install_ids = get_user_to_all_install_ids()
+
+
+
 unpaired_actions = 0
 paired_actions = 0
 unpaired_impressions = 0
 paired_impressions = 0
 impression_lengths = Counter()
 
+@msgpackmemo1arg
 def get_impressions_paired_with_actions(user):
   global paired_actions
   global unpaired_actions
@@ -164,7 +182,22 @@ def get_impressions_paired_with_actions(user):
         paired_actions += 1
   impressions_info_list = []
   actions_info_list = []
-  for tab_id,session_id_to_actions in tab_id_to_action_id_to_
+  for tab_id,session_id_to_actions in tab_id_to_session_id_to_actions.items():
+    for session_id,actions in session_id_to_actions.items():
+      is_paired = False
+      if tab_id not in tab_id_to_session_id_to_impressions or (session_id not in tab_id_to_session_id_to_impressions[tab_id]):
+        # action but no impression
+        unpaired_actions += 1
+        is_paired = False
+      else:
+        # action with corresponding impression
+        paired_actions += 1
+        is_paired = True
+      if len(actions) != 1:
+        continue
+      action_info = copy(actions[0])
+      action_info['is_paired'] = is_paired
+      actions_info_list.append(action_info)
   for tab_id,session_id_to_impressions in tab_id_to_session_id_to_impressions.items():
     for session_id,impressions in session_id_to_impressions.items():
       is_paired = False
@@ -183,11 +216,16 @@ def get_impressions_paired_with_actions(user):
       impression_info = copy(impressions[0])
       impression_info['is_paired'] = is_paired
       impressions_info_list.append(impression_info)
+  actions_info_list.sort(key=lambda x: x['timestamp_local'])
   impressions_info_list.sort(key=lambda x: x['timestamp_local'])
-  return impressions_info_list
-      
+  return impressions_info_list,actions_info_list
+
 
 for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
   get_impressions_paired_with_actions(user)
 #impressions_info_list = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
 print('paired_actions', paired_actions)
@@ -196,6 +234,10 @@ print('paired impressions', paired_impressions)
 print('unpaired impressions', unpaired_impressions)
 print('impression lengths')
 print(impression_lengths)
+
+
+
+impressions_info_list,actions_info_list = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
 
 
 

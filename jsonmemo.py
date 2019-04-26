@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 2316621100a698d15dc59334c1df5f25
+# md5: d9f3f1bf8fbfb9a40311ca9d3f85f08c
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -44,9 +44,17 @@ def decode_custom(obj):
 #     return 'cached_func_calls'
 #   return cache_dirname
 
+lowmem = False
 
-def create_jsonmemo_funcs(cache_dirname, lowmem=False):
-  
+def set_lowmem(is_lowmem):
+  global lowmem
+  lowmem = is_lowmem
+
+cached_jsonmemo_funcs = {} # type: Dict[str, Any]
+
+def create_jsonmemo_funcs(cache_dirname):
+  if cache_dirname in cached_jsonmemo_funcs:
+    return cached_jsonmemo_funcs[cache_dirname]
   path_to_cache_mparr = {} # type: Dict[str, Any]
   def mparrmemo(f):
     if not os.path.isdir(cache_dirname):
@@ -312,7 +320,7 @@ def create_jsonmemo_funcs(cache_dirname, lowmem=False):
       return cacheitem
     return wrapped
   
-  return {
+  output = {
     'jsonmemo': jsonmemo,
     'jsonmemo1arg': jsonmemo1arg,
     'mparrmemo': mparrmemo,
@@ -320,6 +328,8 @@ def create_jsonmemo_funcs(cache_dirname, lowmem=False):
     'msgpackmemo1arg': msgpackmemo1arg,
     'msgpackmemo2arg': msgpackmemo2arg,
   }
+  cached_jsonmemo_funcs[cache_dirname] = output
+  return output
 
 
 
