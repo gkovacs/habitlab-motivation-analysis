@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c976d7125176410b038c8d15c8f971a7
+# md5: e9dff3adb63c335da83d59c99d47b118
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -21,6 +21,17 @@ import urllib.parse
 import moment
 import datetime
 import pandas as pd
+
+
+
+import jsonmemo as jsonmemo_module
+#jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'), lowmem=True)
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+jsonmemo = jsonmemo_funcs['jsonmemo']
+mparrmemo = jsonmemo_funcs['mparrmemo']
+msgpackmemo1arg = jsonmemo_funcs['msgpackmemo1arg']
+msgpackmemo = jsonmemo_funcs['msgpackmemo']
 
 
 
@@ -87,13 +98,17 @@ def get_db(): # this is for the browser
   db = client[getsecret("DB_NAME")]
   return db
 
-@memoize
+@msgpackmemo1arg
 def get_collection_items(collection_name):
   db = get_db()
   return [x for x in db[collection_name].find({})]
 
 def get_collection_for_user(user, collection_name):
   return get_collection_items(user + '_' + collection_name)
+
+def get_collection_for_install_id(install_id, collection_name):
+  pass
+  # TODO
 
 
 
@@ -114,7 +129,11 @@ def get_users_with_goal_frequency_set():
 
 
 
-@memoize
+
+
+
+
+@msgpackmemo
 def get_user_to_all_install_ids():
   install_info_list = get_collection_items('installs')
   output = {}
@@ -133,7 +152,33 @@ def get_user_to_all_install_ids():
 
 
 
-@memoize
+@msgpackmemo
+def get_user_to_all_install_ids_precise():
+  user_to_all_install_ids_fast = get_user_to_all_install_ids()
+  output = {}
+  for user,install_ids_fast in user_to_all_install_ids_fast.items():
+    install_ids = get_all_install_ids_for_user(user)
+    output[user] = install_ids
+  return output
+
+
+
+@msgpackmemo
+def get_install_id_to_user():
+  user_to_install_ids = get_user_to_all_install_ids_precise()
+  output = {}
+  for user,install_ids in user_to_install_ids.items():
+    for install_id in install_ids:
+      if install_id in output:
+        print(install_id, user)
+      output[install_id] = user
+  return output
+
+
+
+
+
+@msgpackmemo1arg
 def get_all_install_ids_for_user(user):
   seconds_on_domain_per_session = get_collection_for_user(user, 'synced:seconds_on_domain_per_session')
   interventions_active_for_domain_and_session = get_collection_for_user(user, 'synced:interventions_active_for_domain_and_session')
@@ -161,7 +206,7 @@ def get_all_install_ids_for_user(user):
       output.append(install_id)
   return output
 
-@memoize
+@msgpackmemo1arg
 def get_is_user_unofficial(user):
   seconds_on_domain_per_session = get_collection_for_user(user, 'synced:seconds_on_domain_per_session')
   interventions_active_for_domain_and_session = get_collection_for_user(user, 'synced:interventions_active_for_domain_and_session')

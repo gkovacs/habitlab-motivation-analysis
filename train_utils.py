@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 94a2677c457f687f50cd58b39b996a5b
+# md5: 716f450c954c94b7858182fdd399635d
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -7,7 +7,6 @@
 
 import random
 from memoize import memoize
-import copy
 import importlib
 from os import path
 import os
@@ -180,7 +179,7 @@ def sample_random_parameters(list_of_parameters_to_sample):
       val = get_parameter_random_value(parameter_name)
     else:
       val = get_parameter_default(parameter_name)
-    parameter_info = copy.copy(get_parameter_info(parameter_name))
+    parameter_info = copy(get_parameter_info(parameter_name))
     parameter_info['value'] = val
     output.append(parameter_info)
   enabled_features_list = get_enabled_features_list_from_parameter_info_list(output)
@@ -218,10 +217,18 @@ def get_enabled_features_list_from_parameter_info_list(parameter_info_list):
 
 
 def get_data_for_parameters(parameter_info_list):
+  print('running get_data_for_parameters')
   dataparams = get_parameter_map_for_type(parameter_info_list, 'dataparam')
   enabled_feature_list = get_enabled_features_list_from_parameter_info_list(parameter_info_list)
   dataparams['enabled_feature_list'] = enabled_feature_list
-  all_data_tensors = make_tensors_from_features(get_all_features_data(), dataparams)
+  print('running get_all_features_data')
+  all_features_data = get_all_features_data()
+  print('all_features_data is')
+  print(type(all_features_data))
+  all_data_tensors = make_tensors_from_features(all_features_data, dataparams)
+  print('all_data_tensors is')
+  print(type(all_data_tensors))
+  print('running split_into_train_dev_test')
   return split_into_train_dev_test(all_data_tensors) # training,dev,test
 
 def get_model_for_parameter_map(model_params):

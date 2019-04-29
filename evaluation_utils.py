@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: a21afbb0948dd92a1e9c80050e0df7fd
+# md5: f64750f5488b3475305d43be641b2a2b
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -407,6 +407,10 @@ def get_evaluation_results_for_named_baseline(baseline_name):
 
 
 
+
+
+
+
 def set_parameter_in_parameter_info_list(parameter_info_list, parameter_name, parameter_value):
   for parameter_info in parameter_info_list:
     if parameter_info['name'] == parameter_name:
@@ -415,7 +419,9 @@ def set_parameter_in_parameter_info_list(parameter_info_list, parameter_name, pa
 
 @jsonmemo1arg
 def get_evaluation_results_for_sample_every_n_visits(sample_every_n_visits):
-  parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_08"], "value": "2019_04_01"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
+  true = True
+  false = False
+  parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_11"], "value": "2019_04_11"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
   set_parameter_in_parameter_info_list(parameter_info_list, 'sample_every_n_visits', sample_every_n_visits)
   train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
   evaluation_results = evaluate_baseline_model_on_dataset(parameter_info_list, dev_data)
@@ -426,13 +432,14 @@ def main():
     print(baseline_name)
     print(get_evaluation_results_for_named_baseline(baseline_name))
   
-  sample_every_n_visits_options : List[int] = list(range(1, 1000))
+  sample_every_n_visits_options = [1,2,3,4,5,7,9,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130]
+  sample_every_n_visits_options.extend(list(range(1, 1000)))
   for sample_every_n_visits in sample_every_n_visits_options:
     print(sample_every_n_visits)
     print(get_evaluation_results_for_sample_every_n_visits(sample_every_n_visits))
 
 
-main()
+#main()
 
 
 
@@ -461,40 +468,18 @@ main()
 
 
 
-scatterplot = []
-for k,v in every_n_visits_to_dev_evaluation_results.items():
-  scatterplot.append([k,v['dev_correct'] / v['dev_total']])
-
-
-
-import plotly.graph_objs as go
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-
-
-
-print(scatterplot)
 
 
 
 
 
-# Create a trace
-trace = go.Scatter(
-    x = [x[0] for x in scatterplot],
-    y = [x[1] for x in scatterplot],
-    mode = 'markers'
-)
-
-data = [trace]
-
-# Plot and embed in ipython notebook!
-iplot(data)
 
 
 
-baseline_name_and_correctness : List[Tuple[str, float]] = []
-for k2,v2 in baseline_name_to_stats.items():
-  correctness : float = float(v2['dev_correct'] / v2['dev_total'])
-  baseline_name_and_correctness.append((k2, correctness))
-print(baseline_name_and_correctness)
+
+
+
+
+
+
 
