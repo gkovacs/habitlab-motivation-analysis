@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: d9f3f1bf8fbfb9a40311ca9d3f85f08c
+# md5: 31e168a3f684511b491abbc05e2b1c14
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -50,6 +50,17 @@ def set_lowmem(is_lowmem):
   global lowmem
   lowmem = is_lowmem
 
+funcname_to_is_lowmem = {} # type: Dict[str, bool]
+  
+def is_lowmem_funcname(funcname):
+  is_lowmem = funcname_to_is_lowmem.get(funcname, None)
+  if is_lowmem != None:
+    return is_lowmem
+  return lowmem
+
+def set_lowmem_funcname(funcname, is_lowmem):
+  funcname_to_is_lowmem[funcname] = is_lowmem
+
 cached_jsonmemo_funcs = {} # type: Dict[str, Any]
 
 def create_jsonmemo_funcs(cache_dirname):
@@ -88,7 +99,7 @@ def create_jsonmemo_funcs(cache_dirname):
           cache.append(unpacked)
           #yield unpacked
         #cache = json.load(open(cachepath), object_hook=decode_custom)
-        if not lowmem:
+        if not is_lowmem_funcname(funcname):
           path_to_cache_mparr[funcname] = cache
         return cache
       except Exception as e:
@@ -106,7 +117,7 @@ def create_jsonmemo_funcs(cache_dirname):
       outfile.close()
       os.replace(cachepath + '.tmp', cachepath)
       print('done with computation ' + cachepath)
-      if not lowmem:
+      if not is_lowmem_funcname(funcname):
         path_to_cache_mparr[funcname] = cache
       #json.dump(cache, open(cachepath, 'w'), default=encode_custom)
       #return cache
@@ -137,7 +148,7 @@ def create_jsonmemo_funcs(cache_dirname):
         return cache
       try:
         cache = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
-        if not lowmem:
+        if not is_lowmem_funcname(funcname):
           path_to_cache_msgpackmemo[funcname] = cache
         return cache
       except Exception as e:
@@ -145,7 +156,7 @@ def create_jsonmemo_funcs(cache_dirname):
         print(e)
         pass
       cache = f()
-      if not lowmem:
+      if not is_lowmem_funcname(funcname):
         path_to_cache_msgpackmemo[funcname] = cache
       msgpack.dump(cache, open(cachepath, 'wb'), default=encode_custom)
       return cache
@@ -173,7 +184,8 @@ def create_jsonmemo_funcs(cache_dirname):
         return cache
       try:
         cache = json.load(open(cachepath, 'rt'), object_hook=decode_custom)
-        path_to_cache[funcname] = cache
+        if not is_lowmem_funcname(funcname):
+          path_to_cache[funcname] = cache
         return cache
       except Exception as e:
         print('exception in jsonmemo for file ' + cachepath)
@@ -182,7 +194,8 @@ def create_jsonmemo_funcs(cache_dirname):
       print('performing computation ' + cachepath)
       cache = f()
       print('done with computation ' + cachepath)
-      path_to_cache[funcname] = cache
+      if not is_lowmem_funcname(funcname):
+        path_to_cache[funcname] = cache
       json.dump(cache, open(cachepath, 'wt'), default=encode_custom)
       return cache
     return wrapped
@@ -214,7 +227,7 @@ def create_jsonmemo_funcs(cache_dirname):
       cachepath = os.path.join(func_cache_dir, str(arg1) + '.json')
       try:
         cacheitem = json.load(open(cachepath, 'rt'), object_hook=decode_custom)
-        if not lowmem:
+        if not is_lowmem_funcname(funcname):
           path_to_cache_1arg[funcname][arg1] = cacheitem
         return cacheitem
       except Exception as e:
@@ -224,7 +237,7 @@ def create_jsonmemo_funcs(cache_dirname):
       print('performing computation ' + cachepath + ' for arg ' + str(arg1))
       cacheitem = f(arg1)
       print('done with computation ' + cachepath)
-      if not lowmem:
+      if not is_lowmem_funcname(funcname):
         path_to_cache_1arg[funcname][arg1] = cacheitem
       json.dump(cacheitem, open(cachepath, 'wt'), default=encode_custom)
       return cacheitem
@@ -257,7 +270,7 @@ def create_jsonmemo_funcs(cache_dirname):
       cachepath = os.path.join(func_cache_dir, str(arg1) + '.msgpack')
       try:
         cacheitem = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
-        if not lowmem:
+        if not is_lowmem_funcname(funcname):
           path_to_cache_msgpack1arg[funcname][arg1] = cacheitem
         return cacheitem
       except Exception as e:
@@ -267,7 +280,7 @@ def create_jsonmemo_funcs(cache_dirname):
       print('performing computation ' + cachepath + ' for arg ' + str(arg1))
       cacheitem = f(arg1)
       print('done with computation ' + cachepath)
-      if not lowmem:
+      if not is_lowmem_funcname(funcname):
         path_to_cache_msgpack1arg[funcname][arg1] = cacheitem
       msgpack.dump(cacheitem, open(cachepath, 'wb'), default=encode_custom)
       return cacheitem
@@ -300,7 +313,7 @@ def create_jsonmemo_funcs(cache_dirname):
       cachepath = os.path.join(func_cache_dir, str(arg1), str(arg2) + '.msgpack')
       try:
         cacheitem = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
-        if not lowmem:
+        if not is_lowmem_funcname(funcname):
           if arg1 not in path_to_cache_msgpack2arg[funcname]:
             path_to_cache_msgpack2arg[funcname][arg1] = {}
           path_to_cache_msgpack2arg[funcname][arg1][arg2] = cacheitem
@@ -312,7 +325,7 @@ def create_jsonmemo_funcs(cache_dirname):
       print('performing computation ' + cachepath + ' for arg ' + str(arg1))
       cacheitem = f(arg1, arg2)
       print('done with computation ' + cachepath)
-      if not lowmem:
+      if not is_lowmem_funcname(funcname):
         if arg1 not in path_to_cache_msgpack2arg[funcname]:
           path_to_cache_msgpack2arg[funcname][arg1] = {}
         path_to_cache_msgpack2arg[funcname][arg1][arg2] = cacheitem

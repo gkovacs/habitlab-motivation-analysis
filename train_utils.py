@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 102cf8b132b08b9116aa22b36e32f722
+# md5: 716f450c954c94b7858182fdd399635d
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -179,7 +179,7 @@ def sample_random_parameters(list_of_parameters_to_sample):
       val = get_parameter_random_value(parameter_name)
     else:
       val = get_parameter_default(parameter_name)
-    parameter_info = copy.copy(get_parameter_info(parameter_name))
+    parameter_info = copy(get_parameter_info(parameter_name))
     parameter_info['value'] = val
     output.append(parameter_info)
   enabled_features_list = get_enabled_features_list_from_parameter_info_list(output)
