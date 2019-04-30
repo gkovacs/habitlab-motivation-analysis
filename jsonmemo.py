@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 31e168a3f684511b491abbc05e2b1c14
+# md5: 01901293d08dbaef68be9b83fa87b6da
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -15,12 +15,21 @@ import json
 import os, functools
 import msgpack
 import bson
+import torch
+import numpy
 
 def encode_custom(obj):
   if isinstance(obj, arrow.Arrow):
     return {'__arrow__': True, 'as_str': str(obj)}
   if isinstance(obj, bson.objectid.ObjectId):
     return {'__bsonid__': True, 'as_str': str(obj)}
+  if isinstance(obj, torch.Tensor):
+    torch_type = obj.type()
+    if torch_type == 'torch.FloatTensor':
+      numpy_obj = obj.numpy()
+      numpy_type = numpy_obj.dtype
+      if numpy_type == numpy.float32:
+        return {'__torch_tensor_float32__': True, 'as_str': json.dumps(numpy_obj.tolist())}
   return obj
 
 def decode_custom(obj):
@@ -28,6 +37,8 @@ def decode_custom(obj):
     return arrow.get(obj['as_str'])
   if '__bsonid__' in obj:
     return bson.objectid.ObjectId(obj['as_str'])
+  if '__torch_tensor_float32__' in obj:
+    return torch.tensor(numpy.array(json.loads(obj['as_str']), dtype='float32'), dtype=torch.float32)
   return obj
 
 
@@ -54,7 +65,7 @@ funcname_to_is_lowmem = {} # type: Dict[str, bool]
   
 def is_lowmem_funcname(funcname):
   is_lowmem = funcname_to_is_lowmem.get(funcname, None)
-  if is_lowmem != None:
+  if is_lowmem is not None:
     return is_lowmem
   return lowmem
 
@@ -81,13 +92,13 @@ def create_jsonmemo_funcs(cache_dirname):
     @functools.wraps(f)
     def wrapped():
       nonlocal cache
-      if cache != None:
+      if cache is not None:
         #for x in cache:
         #  yield cache
         #return
         return cache
       cache = path_to_cache_mparr.get(funcname, None)
-      if cache != None:
+      if cache is not None:
         #for x in cache:
         #  yield cache
         #return
@@ -141,10 +152,10 @@ def create_jsonmemo_funcs(cache_dirname):
     @functools.wraps(f)
     def wrapped():
       nonlocal cache
-      if cache != None:
+      if cache is not None:
         return cache
       cache = path_to_cache_msgpackmemo.get(funcname, None)
-      if cache != None:
+      if cache is not None:
         return cache
       try:
         cache = msgpack.load(open(cachepath, 'rb'), raw=False, object_hook=decode_custom)
@@ -177,10 +188,10 @@ def create_jsonmemo_funcs(cache_dirname):
     @functools.wraps(f)
     def wrapped():
       nonlocal cache
-      if cache != None:
+      if cache is not None:
         return cache
       cache = path_to_cache.get(funcname, None)
-      if cache != None:
+      if cache is not None:
         return cache
       try:
         cache = json.load(open(cachepath, 'rt'), object_hook=decode_custom)
@@ -222,7 +233,7 @@ def create_jsonmemo_funcs(cache_dirname):
     def wrapped(arg1):
       nonlocal cache
       val = cache.get(arg1, None)
-      if val != None:
+      if val is not None:
         return val
       cachepath = os.path.join(func_cache_dir, str(arg1) + '.json')
       try:
@@ -265,7 +276,7 @@ def create_jsonmemo_funcs(cache_dirname):
     def wrapped(arg1):
       nonlocal cache
       val = cache.get(arg1, None)
-      if val != None:
+      if val is not None:
         return val
       cachepath = os.path.join(func_cache_dir, str(arg1) + '.msgpack')
       try:
@@ -308,7 +319,7 @@ def create_jsonmemo_funcs(cache_dirname):
     def wrapped(arg1, arg2):
       nonlocal cache
       val = cache.get(arg1, None)
-      if val != None:
+      if val is not None:
         return val
       cachepath = os.path.join(func_cache_dir, str(arg1), str(arg2) + '.msgpack')
       try:
@@ -347,6 +358,39 @@ def create_jsonmemo_funcs(cache_dirname):
 
 
 
+
+
+
+
+from getsecret import getsecret
+jsonmemo_funcs = create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo = jsonmemo_funcs['jsonmemo']
+msgpackmemo = jsonmemo_funcs['msgpackmemo']
+
+
+@msgpackmemo
+def get_tensor_sample():
+  a=torch.tensor([1], dtype=torch.float32)
+  b=torch.tensor([2], dtype=torch.float32)
+  c=torch.tensor([3], dtype=torch.float32)
+  return [{'features': a}],[{'features': b}],[{'features': c}]
+
+get_tensor_sample()
+
+
+
+# cache = json.load(open('/home/geza/motivation/2019_04_25/get_tensor_sample.json', 'rt'), object_hook=decode_custom)
+
+
+
+
+
+
+
+# a=json.loads(json.loads(open('/home/geza/motivation/2019_04_25/get_tensor_sample.json', 'rt').read())['as_str'])
+# b=numpy.array(a, dtype='float32')
+# c=torch.tensor(b, dtype=torch.float32)
+# #torch.tensor(numpy.array(json.load(open('/home/geza/motivation/2019_04_25/get_tensor_sample.json', 'rt')), dtype='float32'), dtype=torch.float32)
 
 
 
