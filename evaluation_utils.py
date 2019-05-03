@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 763002728d8e8e4aef6f86ed5439cc66
+# md5: 8156cf833a474483c87304b6360cece5
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -92,7 +92,7 @@ def remove_incomplete_models():
       shutil.rmtree(model_name)
       #print(status_info)
 
-remove_incomplete_models()
+# remove_incomplete_models()
 
 
 
@@ -151,7 +151,7 @@ def get_models_with_dev_correct_fraction():
   output.reverse()
   return output
 
-get_models_with_dev_correct_fraction()
+#get_models_with_dev_correct_fraction()
 
 
 

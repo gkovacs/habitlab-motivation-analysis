@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 01901293d08dbaef68be9b83fa87b6da
+# md5: a5d02c5d927151aa65c4130285188bf6
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -30,6 +30,11 @@ def encode_custom(obj):
       numpy_type = numpy_obj.dtype
       if numpy_type == numpy.float32:
         return {'__torch_tensor_float32__': True, 'as_str': json.dumps(numpy_obj.tolist())}
+    if torch_type == 'torch.LongTensor':
+      numpy_obj = obj.numpy()
+      numpy_type = numpy_obj.dtype
+      if numpy_type == numpy.int64:
+        return {'__torch_tensor_int64__': True, 'as_str': json.dumps(numpy_obj.tolist())}
   return obj
 
 def decode_custom(obj):
@@ -39,6 +44,8 @@ def decode_custom(obj):
     return bson.objectid.ObjectId(obj['as_str'])
   if '__torch_tensor_float32__' in obj:
     return torch.tensor(numpy.array(json.loads(obj['as_str']), dtype='float32'), dtype=torch.float32)
+  if '__torch_tensor_int64__' in obj:
+    return torch.tensor(numpy.array(json.loads(obj['as_str']), dtype='int64'), dtype=torch.int64)
   return obj
 
 
@@ -357,25 +364,97 @@ def create_jsonmemo_funcs(cache_dirname):
 
 
 
+# from getsecret import getsecret
+# jsonmemo_funcs = create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+# jsonmemo = jsonmemo_funcs['jsonmemo']
+# msgpackmemo = jsonmemo_funcs['msgpackmemo']
+
+
+
+# from evaluation_utils import *
+
+
+
+# true = True
+# false = False
+# parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_11"], "value": "2019_04_11"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
+# set_parameter_in_parameter_info_list(parameter_info_list, 'sample_every_n_visits', 1)
+# train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
+
+
+
+# data_to_cache = train_data,dev_data,test_data
+
+
+
+# print((data_to_cache[0][0]['feature'].numpy().dtype))
+
+
+
+# print(data_to_cache[0][0]['category'].numpy().dtype == numpy.int64)
+
+
+
+# print(data_to_cache[0][0]['category'].numpy().dtype)
+
+
+
+# print(data_to_cache[0][0]['feature'].type())
+
+
+
+# def encode_custom(obj):
+#   if isinstance(obj, arrow.Arrow):
+#     return {'__arrow__': True, 'as_str': str(obj)}
+#   if isinstance(obj, bson.objectid.ObjectId):
+#     return {'__bsonid__': True, 'as_str': str(obj)}
+#   if isinstance(obj, torch.Tensor):
+#     torch_type = obj.type()
+#     if torch_type == 'torch.FloatTensor':
+#       numpy_obj = obj.numpy()
+#       numpy_type = numpy_obj.dtype
+#       if numpy_type == numpy.float32:
+#         return {'__torch_tensor_float32__': True, 'as_str': json.dumps(numpy_obj.tolist())}
+#     if torch_type == 'torch.LongTensor':
+#       numpy_obj = obj.numpy()
+#       numpy_type = numpy_obj.dtype
+#       if numpy_type == numpy.int64:
+#         return {'__torch_tensor_int64__': True, 'as_str': json.dumps(numpy_obj.tolist())}
+#   return obj
+
+
+
+# #msgpack.dump([3, [1,arrow.get()]], open('testfile.msgpack', 'wb'), default=encode_custom)
+# msgpack.dump(data_to_cache, open('testfile.msgpack', 'wb'), default=encode_custom)
+
+
+
+# @msgpackmemo
+# def get_default_train_dev_test_data():
+#   true = True
+#   false = False
+#   parameter_info_list = [{"name": "dataset_name", "type": "dataset", "values": ["2019_04_11"], "value": "2019_04_11"}, {"name": "model_name", "type": "model", "values": ["selfattentionlstm"], "value": "selfattentionlstm"}, {"name": "criterion", "type": "model", "values": ["NLLLoss"], "value": "NLLLoss"}, {"name": "learning_rate", "type": "model", "values": [0.005, 0.05, 0.0005, 5e-05], "value": 5e-05}, {"name": "window_embed_size", "type": "model", "values": [64, 128, 256, 512], "value": 256}, {"name": "difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "time_of_day", "type": "feature", "values": [true, false], "value": true}, {"name": "day_of_week", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_productivity", "type": "feature", "values": [true, false], "value": true}, {"name": "domain_category", "type": "feature", "values": [true, false], "value": true}, {"name": "initial_difficulty", "type": "feature", "values": [true, false], "value": true}, {"name": "languages", "type": "feature", "values": [true, false], "value": true}, {"name": "num_prior_entries", "type": "dataparam", "values": [10, 20, 30, 40], "value": 10}, {"name": "sample_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "sample_difficulty_every_n_visits", "type": "dataparam", "values": [1], "value": 1}, {"name": "disable_prior_visit_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "disable_difficulty_history", "type": "dataparam", "values": [false, true], "value": false}, {"name": "enable_current_difficulty", "type": "dataparam", "values": [false, true], "value": false}, {"name": "num_features", "type": "model", "values": [277], "value": 277}]
+#   set_parameter_in_parameter_info_list(parameter_info_list, 'sample_every_n_visits', 1)
+#   train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
+#   return train_data,dev_data,test_data
 
 
 
 
+# from getsecret import getsecret
+# jsonmemo_funcs = create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+# jsonmemo = jsonmemo_funcs['jsonmemo']
+# msgpackmemo = jsonmemo_funcs['msgpackmemo']
 
-from getsecret import getsecret
-jsonmemo_funcs = create_jsonmemo_funcs(getsecret('DATA_DUMP'))
-jsonmemo = jsonmemo_funcs['jsonmemo']
-msgpackmemo = jsonmemo_funcs['msgpackmemo']
 
+# @msgpackmemo
+# def get_tensor_sample():
+#   a=torch.tensor([1], dtype=torch.float32)
+#   b=torch.tensor([2], dtype=torch.float32)
+#   c=torch.tensor([3], dtype=torch.float32)
+#   return [{'features': a}],[{'features': b}],[{'features': c}]
 
-@msgpackmemo
-def get_tensor_sample():
-  a=torch.tensor([1], dtype=torch.float32)
-  b=torch.tensor([2], dtype=torch.float32)
-  c=torch.tensor([3], dtype=torch.float32)
-  return [{'features': a}],[{'features': b}],[{'features': c}]
-
-get_tensor_sample()
+# get_tensor_sample()
 
 
 
