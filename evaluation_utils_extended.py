@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 5b3c23a3716dae9411e293087cb508be
+# md5: 0e1eb7dae49719863c594a89245a48d0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -121,6 +121,7 @@ def get_evaluation_results_for_named_baseline_v4(baseline_name):
   false = False
   parameter_info_list : List[Dict[str, Any]] = get_default_parameter_info_list()
   #train_data,dev_data,test_data = get_data_for_parameters(parameter_info_list)
+  train_data,dev_data,test_data = get_default_train_dev_test_data()
   baseline_func = baseline_name_to_func[baseline_name]
   return evaluate_function_model_on_dataset_v2(parameter_info_list, baseline_func, dev_data)
 
@@ -216,6 +217,51 @@ def get_evaluation_results_for_sample_every_n_seconds_v2(sample_every_n_seconds)
   train_data,dev_data,test_data = get_default_train_dev_test_data()
   return evaluate_function_model_on_dataset_v2(parameter_info_list, evaluation_func, dev_data)
   
+
+
+
+@jsonmemo1arg
+def get_evaluation_results_for_sample_every_n_seconds_v3(sample_every_n_seconds):
+  true = True
+  false = False
+  user_to_idx_to_difficulty = {}
+  def evaluation_func(tensor, parameter_info_list):
+    user = tensor['user']
+    visit_idx = tensor['visit_idx']
+    if user not in user_to_idx_to_difficulty:
+      user_to_idx_to_difficulty[user] = get_visit_idx_to_predictions_for_timed_sampling_rate_v2(user, sample_every_n_seconds)
+    #if visit_idx < 1:
+    #  return 'nothing'
+    #sampled_visit_idx = get_nearest_visit_idx_for_sample_rate(visit_idx - 1, sample_every_n_visits)
+    return user_to_idx_to_difficulty[user][visit_idx]
+  parameter_info_list = get_default_parameter_info_list()
+  train_data,dev_data,test_data = get_default_train_dev_test_data()
+  return evaluate_function_model_on_dataset_v2(parameter_info_list, evaluation_func, dev_data)
+  
+
+
+
+def get_visit_idx_to_predictions_for_timed_sampling_rate_v2(user, sampling_rate_seconds):
+  user_to_features_data = get_all_features_data()
+  features_data = user_to_features_data.get(user, None)
+  if features_data == None:
+    return 'nothing'
+  sampled_according_to_time = []
+  last_sampled_time = None
+  last_sampled_value = 'nothing'
+  for idx,item in enumerate(features_data['difficulty_items']):
+    difficulty = item['difficulty']
+    arrow_time = item['arrow_time']
+    sampled_according_to_time.append(last_sampled_value)
+    if last_sampled_time != None:
+      seconds_since_last_sample = (arrow_time - last_sampled_time).total_seconds()
+      if seconds_since_last_sample >= sampling_rate_seconds:
+        last_sampled_time = arrow_time
+        last_sampled_value = difficulty
+    else:
+      last_sampled_time = arrow_time
+      last_sampled_value = difficulty
+  return sampled_according_to_time
 
 
 
