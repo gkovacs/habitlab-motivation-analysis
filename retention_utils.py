@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: d5a117379dfb1f13eda7e75cc0ef556f
+# md5: 25afddbe510a49f63ba98a7df988bff5
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -234,11 +234,79 @@ def get_retention_info_by_frequency_of_choose_difficulty():
 
 
 
+get_ipython().run_line_magic('load_ext', 'rpy2.ipython')
+
+
+
+def rg(r_code):
+  r(f"""rg_func <- function() {{
+    {r_code}
+  }}""")
+  get_ipython().run_line_magic('R', '-w 1000 print(rg_func())')
+
+def rg2(r_code):
+  get_ipython().run_line_magic('R', '-w 1000', f"""print((function() {{
+    {r_code}
+  }})())""")
+
+
+
+get_ipython().run_line_magic('R', '-w 1000', 'show("hello world")')
+
+
+
+rg2('show("hello world")')
+
+
+
+def plot_attrition(pandas_df, varname):
+  r.assign('plot_attrition_df', pandas_df)
+  rg2(f"""
+  plot_attrition_df$lifetime <- as.numeric(plot_attrition_df$lifetime)
+  plot_attrition_df$attritioned <- as.logical(plot_attrition_df$attritioned)
+  plot_attrition_df${varname} <- as.factor(plot_attrition_df${varname})
+  library("survival")
+  library("survminer")
+  fit <- survfit(Surv(lifetime, attritioned) ~ {varname}, data=plot_attrition_df)
+  summary(fit)
+  ggsurvplot(fit,
+    pval = TRUE, conf.int = TRUE,
+    risk.table = TRUE, # Add risk table
+    risk.table.col = "strata", # Change risk table color by groups
+    linetype = "strata", # Change line type by groups
+    surv.median.line = "hv", # Specify median survival
+    ggtheme = theme_bw(), # Change ggplot2 theme
+  )
+  """)
+#   r(f"""
+#   plot_attrition_df$lifetime <- as.numeric(plot_attrition_df$lifetime)
+#   plot_attrition_df$attritioned <- as.logical(plot_attrition_df$attritioned)
+#   plot_attrition_df${varname} <- as.factor(plot_attrition_df${varname})
+#   library("survival")
+#   library("survminer")
+#   fit <- survfit(Surv(lifetime, attritioned) ~ {varname}, data=plot_attrition_df)
+#   summary(fit)
+#   plot_attrition_func <- function() {{
+    
+#   }}
+#   """)
+#   %R -w 1000 print(plot_attrition_func())
+
+
+
+plot_attrition(get_retention_info_by_frequency_of_choose_difficulty(), 'frequency_of_choose_difficulty')
+
+
+
+
+
+
+
 df = get_retention_info_by_frequency_of_choose_difficulty()
 
 
 
-r.assign('df', df)
+
 
 
 
@@ -249,13 +317,13 @@ library("survminer")
 
 
 
-def plot_retention(df):
+#def plot_retention(df):
   
 
 
 
-df = get_all_user_retentions_dataframe()
-r.assign('df', df)
+#df = get_all_user_retentions_dataframe()
+#r.assign('df', df)
 
 
 
@@ -263,9 +331,9 @@ print(df)
 
 
 
-r('''
-install.packages("survival")
-''')
+#r('''
+#install.packages("survival")
+#''')
 
 
 
@@ -283,6 +351,14 @@ summary(fit)
 
 
 get_ipython().run_line_magic('load_ext', 'rpy2.ipython')
+
+
+
+get_ipython().run_cell_magic('R', '', 'df$lifetime <- as.numeric(df$lifetime)\ndf$attritioned <- as.logical(df$attritioned)\ndf$frequency_of_choose_difficulty <- as.factor(df$frequency_of_choose_difficulty)')
+
+
+
+get_ipython().run_cell_magic('R', '', 'summary(df)')
 
 
 
