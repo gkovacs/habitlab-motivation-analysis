@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-# md5: 63f8af9e7fb4499f293436fd5f701399
+# md5: a5e219c6bae22edcc4b379d03e77e785
 #!/usr/bin/env python
 # coding: utf-8
+
+from train_utils import *
 
 
 
@@ -26,7 +28,11 @@ msgpackmemo = jsonmemo_funcs['msgpackmemo']
 
 
 
-from train_utils import *
+
+
+
+
+
 
 
 
@@ -56,8 +62,8 @@ for x in get_collection_names():
 
 #a = get_all_features_data()
 
-for user in get_users():
-  user_to_difficulty_items = get_choose_difficulty_items_for_user(user)
+# for user in get_users():
+#   user_to_difficulty_items = get_choose_difficulty_items_for_user(user)
   #if len(user_to_difficulty_items) > 0:
     #print(user)
     #break
@@ -148,6 +154,10 @@ user_to_install_ids = get_user_to_all_install_ids()
 
 
 
+
+
+
+
 unpaired_actions = 0
 paired_actions = 0
 unpaired_impressions = 0
@@ -218,26 +228,668 @@ def get_impressions_paired_with_actions(user):
       impressions_info_list.append(impression_info)
   actions_info_list.sort(key=lambda x: x['timestamp_local'])
   impressions_info_list.sort(key=lambda x: x['timestamp_local'])
-  return impressions_info_list,actions_info_list
+  return impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions
 
+
+# for user in get_users():
+#   if user not in user_to_install_ids:
+#     continue
+#   if len(user_to_install_ids[user]) != 1:
+#     continue
+#   a = get_impressions_paired_with_actions(user)
+#   continue
+#impressions_info_list = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
+# print('paired_actions', paired_actions)
+# print('unpaired_actions', unpaired_actions)
+# print('paired impressions', paired_impressions)
+# print('unpaired impressions', unpaired_impressions)
+# print('impression lengths')
+# print(impression_lengths)
+
+
+
+time_since_first_impression_and_action_status = []
 
 for user in get_users():
   if user not in user_to_install_ids:
     continue
   if len(user_to_install_ids[user]) != 1:
     continue
-  get_impressions_paired_with_actions(user)
-#impressions_info_list = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
-print('paired_actions', paired_actions)
-print('unpaired_actions', unpaired_actions)
-print('paired impressions', paired_impressions)
-print('unpaired impressions', unpaired_impressions)
-print('impression lengths')
-print(impression_lengths)
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  earliest_timestamp = None
+  latest_timestamp = None
+  for x in impressions_info_list:
+    timestamp = x['timestamp_local']
+    if earliest_timestamp == None:
+      earliest_timestamp = timestamp
+      latest_timestamp = timestamp
+    earliest_timestamp = min(timestamp, earliest_timestamp)
+    latest_timestamp = max(timestamp, latest_timestamp)
+  if earliest_timestamp == None:
+    continue
+  num_days_of_data = (latest_timestamp - earliest_timestamp) / (3600 * 24)
+  if num_days_of_data < 7*8:
+    continue
+  for x in impressions_info_list:
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    timestamp = x['timestamp_local']
+    have_actions = True
+    if tab_id not in tab_id_to_session_id_to_actions:
+      have_actions = False
+    elif session_id not in tab_id_to_session_id_to_actions[tab_id]:
+      have_actions = False
+    if have_actions:
+      actions = tab_id_to_session_id_to_actions[tab_id][session_id]
+      action_info = actions[0]
+      action_type = 'random'
+      if 'is_random' not in action_info:
+        continue
+      if action_info['is_random'] == True:
+        action_type = 'random'
+      else:
+        action_type = 'choice'
+        difficulty = action_info['difficulty']
+        #time_since_first_impression_and_difficulty_chosen.append((time_since_first_impression, difficulty))
+      time_since_first_impression = timestamp - earliest_timestamp
+      time_since_first_impression_and_action_status.append((time_since_first_impression, action_type))
+    else:
+      actions = []
+      action_type = 'none'
+      time_since_first_impression = timestamp - earliest_timestamp
+      time_since_first_impression_and_action_status.append((time_since_first_impression, action_type))
 
 
 
-impressions_info_list,actions_info_list = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
+time_since_first_impression_and_difficulty_chosen = []
+
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  earliest_timestamp = None
+  latest_timestamp = None
+  for x in impressions_info_list:
+    timestamp = x['timestamp_local']
+    if earliest_timestamp == None:
+      earliest_timestamp = timestamp
+      latest_timestamp = timestamp
+    earliest_timestamp = min(timestamp, earliest_timestamp)
+    latest_timestamp = max(timestamp, latest_timestamp)
+  if earliest_timestamp == None:
+    continue
+  num_days_of_data = (latest_timestamp - earliest_timestamp) / (3600 * 24)
+  if num_days_of_data < 7*8:
+    continue
+  for x in impressions_info_list:
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    timestamp = x['timestamp_local']
+    have_actions = True
+    if tab_id not in tab_id_to_session_id_to_actions:
+      have_actions = False
+    elif session_id not in tab_id_to_session_id_to_actions[tab_id]:
+      have_actions = False
+    if have_actions:
+      actions = tab_id_to_session_id_to_actions[tab_id][session_id]
+      action_info = actions[0]
+      action_type = 'random'
+      if 'is_random' not in action_info:
+        continue
+      if action_info['is_random'] == True:
+        action_type = 'random'
+      else:
+        action_type = 'choice'
+        difficulty = action_info['difficulty']
+        time_since_first_impression = timestamp - earliest_timestamp
+        time_since_first_impression_and_difficulty_chosen.append((time_since_first_impression, difficulty))
+      #if time_since_last_impression != None:
+      #  time_since_last_impression_and_action_status.append((time_since_last_impression, action_type))
+    else:
+      actions = []
+      action_type = 'none'
+      #if time_since_last_impression != None:
+      #  time_since_last_impression_and_action_status.append((time_since_last_impression, action_type))
+
+
+
+time_since_last_impression_and_difficulty_chosen = []
+
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  #get_impressions_paired_with_actions(user)
+  prev_impression_timestamp = None
+  for x in impressions_info_list:
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    timestamp = x['timestamp_local']
+    if prev_impression_timestamp != None:
+      time_since_last_impression = timestamp - prev_impression_timestamp
+    else:
+      time_since_last_impression = None
+    prev_impression_timestamp = timestamp
+    have_actions = True
+    if tab_id not in tab_id_to_session_id_to_actions:
+      have_actions = False
+    elif session_id not in tab_id_to_session_id_to_actions[tab_id]:
+      have_actions = False
+    if have_actions:
+      actions = tab_id_to_session_id_to_actions[tab_id][session_id]
+      action_info = actions[0]
+      action_type = 'random'
+      if 'is_random' not in action_info:
+        continue
+      if action_info['is_random'] == True:
+        action_type = 'random'
+      else:
+        action_type = 'choice'
+        difficulty = action_info['difficulty']
+        if time_since_last_impression != None:
+          time_since_last_impression_and_difficulty_chosen.append((time_since_last_impression, difficulty))
+      #if time_since_last_impression != None:
+      #  time_since_last_impression_and_action_status.append((time_since_last_impression, action_type))
+    else:
+      actions = []
+      action_type = 'none'
+      #if time_since_last_impression != None:
+      #  time_since_last_impression_and_action_status.append((time_since_last_impression, action_type))
+
+
+
+def group_as_difficulty_per_hour(time_since_last_impression_and_difficulty_chosen):
+  difficulty_to_hour_to_counts = {
+    'nothing': Counter(),
+    'easy': Counter(),
+    'medium': Counter(),
+    'hard': Counter(),
+  }
+  for x,difficulty in time_since_last_impression_and_difficulty_chosen:
+    hour = round(x / 3600)
+    if hour > 24:
+      continue
+    difficulty_to_hour_to_counts[difficulty][hour] += 1
+  output = []
+  for difficulty in 'nothing easy medium hard'.split(' '):
+    difficulty_points = []
+    for hour in sorted(list(difficulty_to_hour_to_counts[difficulty].keys())):
+      counts = difficulty_to_hour_to_counts[difficulty][hour]
+      total_counts = 0
+      for other_difficulty in 'nothing easy medium hard'.split(' '):
+        total_counts += difficulty_to_hour_to_counts[other_difficulty].get(hour, 0)
+      fraction = counts / total_counts
+      difficulty_points.append((hour, fraction))
+    output.append((difficulty, difficulty_points))
+  return output
+
+
+
+def group_as_difficulty_per_day(time_since_last_impression_and_difficulty_chosen):
+  difficulty_to_hour_to_counts = {
+    'nothing': Counter(),
+    'easy': Counter(),
+    'medium': Counter(),
+    'hard': Counter(),
+  }
+  for x,difficulty in time_since_last_impression_and_difficulty_chosen:
+    hour = round(x / (3600*24))
+    if hour > 7:
+      continue
+    difficulty_to_hour_to_counts[difficulty][hour] += 1
+  output = []
+  for difficulty in 'nothing easy medium hard'.split(' '):
+    difficulty_points = []
+    for hour in sorted(list(difficulty_to_hour_to_counts[difficulty].keys())):
+      counts = difficulty_to_hour_to_counts[difficulty][hour]
+      total_counts = 0
+      for other_difficulty in 'nothing easy medium hard'.split(' '):
+        total_counts += difficulty_to_hour_to_counts[other_difficulty].get(hour, 0)
+      fraction = counts / total_counts
+      difficulty_points.append((hour, fraction))
+    output.append((difficulty, difficulty_points))
+  return output
+
+
+
+def group_as_difficulty_per_week(time_since_last_impression_and_difficulty_chosen):
+  difficulty_to_hour_to_counts = {
+    'nothing': Counter(),
+    'easy': Counter(),
+    'medium': Counter(),
+    'hard': Counter(),
+  }
+  for x,difficulty in time_since_last_impression_and_difficulty_chosen:
+    hour = round(x / (3600*24*7))
+    if hour > 7:
+      continue
+    difficulty_to_hour_to_counts[difficulty][hour] += 1
+  output = []
+  for difficulty in 'nothing easy medium hard'.split(' '):
+    difficulty_points = []
+    for hour in sorted(list(difficulty_to_hour_to_counts[difficulty].keys())):
+      counts = difficulty_to_hour_to_counts[difficulty][hour]
+      total_counts = 0
+      for other_difficulty in 'nothing easy medium hard'.split(' '):
+        total_counts += difficulty_to_hour_to_counts[other_difficulty].get(hour, 0)
+      fraction = counts / total_counts
+      difficulty_points.append((hour, fraction))
+    output.append((difficulty, difficulty_points))
+  return output
+
+
+
+def plot_histogram(x_values):
+  data = [go.Histogram(x=x_values)]
+  iplot(data)
+
+def plot_points(points):
+  data = [go.Scatter(x=[x for x,y in points], y=[y for x,y in points])]
+  iplot(data)
+
+def plot_several_points(points_list):
+  data = []
+  for label,points in points_list:
+    data.append(go.Scatter(x=[x for x,y in points], y=[y for x,y in points], name=label))
+  iplot(data)
+
+
+
+print(len(time_since_first_impression_and_difficulty_chosen))
+
+
+
+difficulty_with_hours_and_fractions = group_as_difficulty_per_week(time_since_first_impression_and_difficulty_chosen)
+
+
+
+plot_several_points(difficulty_with_hours_and_fractions)
+
+
+
+difficulty_with_hours_and_fractions = group_as_difficulty_per_hour(time_since_last_impression_and_difficulty_chosen)
+
+
+
+plot_several_points(difficulty_with_hours_and_fractions)
+
+
+
+time_since_last_impression_and_action_status = []
+
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  #get_impressions_paired_with_actions(user)
+  prev_impression_timestamp = None
+  for x in impressions_info_list:
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    timestamp = x['timestamp_local']
+    if prev_impression_timestamp != None:
+      time_since_last_impression = timestamp - prev_impression_timestamp
+    else:
+      time_since_last_impression = None
+    prev_impression_timestamp = timestamp
+    have_actions = True
+    if tab_id not in tab_id_to_session_id_to_actions:
+      have_actions = False
+    elif session_id not in tab_id_to_session_id_to_actions[tab_id]:
+      have_actions = False
+    if have_actions:
+      actions = tab_id_to_session_id_to_actions[tab_id][session_id]
+      action_info = actions[0]
+      action_type = 'random'
+      if 'is_random' not in action_info:
+        continue
+      if action_info['is_random'] == True:
+        action_type = 'random'
+      else:
+        action_type = 'choice'
+      if time_since_last_impression != None:
+        time_since_last_impression_and_action_status.append((time_since_last_impression, action_type))
+    else:
+      actions = []
+      action_type = 'none'
+      if time_since_last_impression != None:
+        time_since_last_impression_and_action_status.append((time_since_last_impression, action_type))
+
+
+
+
+
+
+
+def group_as_response_rate_per_hour(time_since_last_impression_and_action_status):
+  hour_to_choice_counts = Counter()
+  hour_to_random_counts = Counter()
+  for x,y in time_since_last_impression_and_action_status:
+    hour = round(x / 3600)
+    if hour > 24:
+      continue
+    if y == 'choice':
+      hour_to_choice_counts[hour] += 1
+    elif y == 'random':
+      hour_to_random_counts[hour] += 1
+  hours_with_data = set()
+  for x in hour_to_choice_counts.keys():
+    hours_with_data.add(x)
+  for x in hour_to_random_counts.keys():
+    hours_with_data.add(x)
+  output = []
+  for hour in sorted(list(hours_with_data)):
+    response_rate = hour_to_choice_counts[hour] / (hour_to_choice_counts[hour] + hour_to_random_counts[hour])
+    output.append((hour, response_rate))
+  return output
+
+def group_as_response_rate_per_hour_oneweek(time_since_last_impression_and_action_status):
+  hour_to_choice_counts = Counter()
+  hour_to_random_counts = Counter()
+  for x,y in time_since_last_impression_and_action_status:
+    hour = round(x / 3600)
+    if hour > 24*7:
+      continue
+    if y == 'choice':
+      hour_to_choice_counts[hour] += 1
+    elif y == 'random':
+      hour_to_random_counts[hour] += 1
+  hours_with_data = set()
+  for x in hour_to_choice_counts.keys():
+    hours_with_data.add(x)
+  for x in hour_to_random_counts.keys():
+    hours_with_data.add(x)
+  output = []
+  for hour in sorted(list(hours_with_data)):
+    response_rate = hour_to_choice_counts[hour] / (hour_to_choice_counts[hour] + hour_to_random_counts[hour])
+    output.append((hour, response_rate))
+  return output
+
+def group_as_response_rate_per_day(time_since_last_impression_and_action_status):
+  hour_to_choice_counts = Counter()
+  hour_to_random_counts = Counter()
+  for x,y in time_since_last_impression_and_action_status:
+    hour = round(x / (3600*24))
+    if hour > 7:
+      continue
+    if y == 'choice':
+      hour_to_choice_counts[hour] += 1
+    elif y == 'random':
+      hour_to_random_counts[hour] += 1
+  hours_with_data = set()
+  for x in hour_to_choice_counts.keys():
+    hours_with_data.add(x)
+  for x in hour_to_random_counts.keys():
+    hours_with_data.add(x)
+  output = []
+  for hour in sorted(list(hours_with_data)):
+    response_rate = hour_to_choice_counts[hour] / (hour_to_choice_counts[hour] + hour_to_random_counts[hour])
+    output.append((hour, response_rate))
+  return output
+
+def group_as_response_rate_per_week(time_since_last_impression_and_action_status):
+  hour_to_choice_counts = Counter()
+  hour_to_random_counts = Counter()
+  for x,y in time_since_last_impression_and_action_status:
+    hour = round(x / (3600*24*7))
+    if hour > 7:
+      continue
+    if y == 'choice':
+      hour_to_choice_counts[hour] += 1
+    elif y == 'random':
+      hour_to_random_counts[hour] += 1
+  hours_with_data = set()
+  for x in hour_to_choice_counts.keys():
+    hours_with_data.add(x)
+  for x in hour_to_random_counts.keys():
+    hours_with_data.add(x)
+  output = []
+  for hour in sorted(list(hours_with_data)):
+    response_rate = hour_to_choice_counts[hour] / (hour_to_choice_counts[hour] + hour_to_random_counts[hour])
+    output.append((hour, response_rate))
+  return output
+
+
+
+response_rate_per_day = group_as_response_rate_per_day(time_since_first_impression_and_action_status)
+response_rate_per_week = group_as_response_rate_per_week(time_since_first_impression_and_action_status)
+
+
+
+
+
+
+
+
+
+
+
+plot_points(response_rate_per_week)
+
+
+
+response_rate_per_hour = group_as_response_rate_per_hour(time_since_last_impression_and_action_status)
+response_rate_per_hour_oneweek = group_as_response_rate_per_hour_oneweek(time_since_last_impression_and_action_status)
+
+
+
+from imp import reload
+import evaluation_utils_extended
+reload(evaluation_utils_extended)
+from evaluation_utils_extended import get_evaluation_results_for_sample_every_n_seconds_v2
+
+
+
+#print((time_since_last_impression_and_action_status)[0])
+response_rate_correctness_per_hour = []
+correctness_per_hour = []
+for hour,response_rate in response_rate_per_hour_oneweek:
+  results = get_evaluation_results_for_sample_every_n_seconds_v2(hour * 3600)
+  correct_percent = results['dev_correct'] / results['dev_total']
+  response_rate_correctness = correct_percent * response_rate
+  response_rate_correctness_per_hour.append((hour, response_rate_correctness))
+  correctness_per_hour.append((hour, correct_percent))
+
+
+
+plot_several_points([('response rate * correctness', response_rate_correctness_per_hour), ('response rate', response_rate_per_hour_oneweek), ('correctness', correctness_per_hour)])
+
+
+
+plot_points(response_rate_per_hour)
+
+
+
+plot_points(response_rate_per_hour_oneweek)
+
+
+
+plot_histogram([x for x,y in time_since_last_impression_and_action_status if y == 'none' and x < 10000])
+
+
+
+plot_histogram([x for x,y in time_since_last_impression_and_action_status if y == 'choice' and x < 10000])
+
+
+
+plot_histogram([x for x,y in time_since_last_impression_and_action_status if y == 'random' and x < 10000])
+
+
+
+
+
+
+
+impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
+
+
+
+print(tab_id_to_session_id_to_impressions.keys())
+
+
+
+latency_list = []
+for x in actions_info_list:
+  if not x['is_paired']:
+    continue
+  tab_id = x['tab_id']
+  session_id = x['session_id']
+  action_timestamp = x['timestamp_local']
+  impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+  impression_timestamp = impression_info['timestamp_local']
+  latency = (action_timestamp - impression_timestamp) / 1000
+  if latency > 30:
+    continue
+  latency_list.append(latency)
+
+
+
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import plotly.graph_objs as go
+
+import numpy as np
+
+
+
+#x = np.random.randn(500)
+data = [go.Histogram(x=latency_list)]
+
+iplot(data)
+
+
+
+latency_list_all = []
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  #get_impressions_paired_with_actions(user)
+  for x in actions_info_list:
+    if not x['is_paired']:
+      continue
+    if 'is_random' not in x:
+      continue
+    if x['is_random'] == True:
+      continue
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    action_timestamp = x['timestamp_local']
+    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+    impression_timestamp = impression_info['timestamp_local']
+    latency = (action_timestamp - impression_timestamp) / 1000
+    if not (0 < latency < 30):
+      continue
+    latency_list_all.append(latency)
+
+
+
+#x = np.random.randn(500)
+data = [go.Histogram(x=latency_list_all)]
+
+iplot(data)
+
+
+
+
+
+
+
+latency_list_all = []
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  #get_impressions_paired_with_actions(user)
+  for x in actions_info_list:
+    if not x['is_paired']:
+      continue
+    if 'is_random' not in x:
+      continue
+    if x['is_random'] == False:
+      continue
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    action_timestamp = x['timestamp_local']
+    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+    impression_timestamp = impression_info['timestamp_local']
+    latency = (action_timestamp - impression_timestamp) / 1000
+    if not (0 < latency < 30):
+      continue
+    latency_list_all.append(latency)
+
+
+
+latency_list_all = []
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  #get_impressions_paired_with_actions(user)
+  for x in actions_info_list:
+    if not x['is_paired']:
+      continue
+    if 'is_random' not in x:
+      continue
+    if x['is_random'] == False:
+      continue
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    action_timestamp = x['timestamp_local']
+    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+    impression_timestamp = impression_info['timestamp_local']
+    latency = (action_timestamp - impression_timestamp) / 1000
+    if not (0 < latency < 30):
+      continue
+    latency_list_all.append(latency)
+
+
+
+#x = np.random.randn(500)
+data = [go.Histogram(x=latency_list_all)]
+
+iplot(data)
+
+
+
+latency_list_all = []
+for user in get_users():
+  if user not in user_to_install_ids:
+    continue
+  if len(user_to_install_ids[user]) != 1:
+    continue
+  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+  #get_impressions_paired_with_actions(user)
+  for x in actions_info_list:
+    if not x['is_paired']:
+      continue
+    tab_id = x['tab_id']
+    session_id = x['session_id']
+    action_timestamp = x['timestamp_local']
+    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+    impression_timestamp = impression_info['timestamp_local']
+    latency = (action_timestamp - impression_timestamp) / 1000
+    if not (0 < latency < 30):
+      continue
+    latency_list_all.append(latency)
+
+
+
+#x = np.random.randn(500)
+data = [go.Histogram(x=latency_list_all)]
+
+iplot(data)
 
 
 

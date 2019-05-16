@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 99b8595b4687380c68eacdc93b299662
+# md5: a4b4c6abcadd2a5a5f5ce3f421afe1f1
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -44,6 +44,11 @@ def compute_cached_data():
   a = get_install_id_to_user()
   for user in get_users():
     install_logs = get_install_logs_for_user(user)
+  from evaluation_utils_extended import main as main_evaluation_utils_extended
+  main_evaluation_utils_extended()
+  from cost_utils import get_impressions_paired_with_actions
+  for user in get_users():
+    impressions_paired_with_actions = get_impressions_paired_with_actions(user)
   print('finished running compute_cached_data')
 
 
