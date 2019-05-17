@@ -1,0 +1,17 @@
+// Workspace settings
+{
+    // The following will hide the js and map files in the editor
+    "files.exclude": {
+        "**/*.ipynb": true,
+        "__pycache__": true,
+        ".mypy_cache": true,
+        ".vscode": true,
+        ".gitignore": true,
+        "*.tar.xz": true,
+        ".ipynb_checkpoints": true,
+        "2019_*": true,
+        ".getsecret.yaml": true,
+        "*.json": true,
+        "requirements.txt": true
+    }
+}

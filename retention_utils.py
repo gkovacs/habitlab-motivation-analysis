@@ -1,20 +1,11 @@
 #!/usr/bin/env python
-# md5: 25afddbe510a49f63ba98a7df988bff5
+# md5: 2c7f0ecfb8594cd2bce648a68b9a92a3
 #!/usr/bin/env python
 # coding: utf-8
 
 
 
-import pandas as pd
-
-import rpy2.situation
-rpy2.situation.get_r_home()
-
-import rpy2
-from rpy2.robjects import r
-
-from rpy2.robjects import pandas2ri
-pandas2ri.activate()
+from r_utils import r, r_assign
 
 
 
@@ -234,34 +225,33 @@ def get_retention_info_by_frequency_of_choose_difficulty():
 
 
 
-get_ipython().run_line_magic('load_ext', 'rpy2.ipython')
 
 
 
-def rg(r_code):
-  r(f"""rg_func <- function() {{
-    {r_code}
-  }}""")
-  get_ipython().run_line_magic('R', '-w 1000 print(rg_func())')
-
-def rg2(r_code):
-  get_ipython().run_line_magic('R', '-w 1000', f"""print((function() {{
-    {r_code}
-  }})())""")
 
 
 
-get_ipython().run_line_magic('R', '-w 1000', 'show("hello world")')
 
 
 
-rg2('show("hello world")')
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 def plot_attrition(pandas_df, varname):
-  r.assign('plot_attrition_df', pandas_df)
-  rg2(f"""
+  r_assign('plot_attrition_df', pandas_df)
+  r(f"""
   plot_attrition_df$lifetime <- as.numeric(plot_attrition_df$lifetime)
   plot_attrition_df$attritioned <- as.logical(plot_attrition_df$attritioned)
   plot_attrition_df${varname} <- as.factor(plot_attrition_df${varname})
@@ -294,11 +284,15 @@ def plot_attrition(pandas_df, varname):
 
 
 
+def make_retention_info_for_user_groups(group_name_to_user_list):
+  
+
+def compare_attrition_for_user_groups(group_name_to_user_list):
+  
+
+
+
 plot_attrition(get_retention_info_by_frequency_of_choose_difficulty(), 'frequency_of_choose_difficulty')
-
-
-
-
 
 
 
