@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 0a4be9ca747483d876cf8d826e57c6b0
+# md5: 8d9746eacb6559ef293f533250c452a0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -202,32 +202,73 @@ def get_all_user_retentions_dataframe():
 
 
 
+def get_retention_info_for_groups_to_installs(group_to_installs, category_name):
+  output = []
+  install_to_retention_info = get_install_to_retention_info()
+  for group,install_list in group_to_installs.items():
+    for install in install_list:
+      if get_is_install_unofficial(install):
+        continue
+      retention_info = install_to_retention_info[install]
+      output.append({
+        'lifetime': retention_info['lifetime'],
+        'attritioned': retention_info['attritioned'],
+        category_name: group,
+      }) 
+  return to_dataframe(output)
 
+
+
+def get_retention_info_for_groups_to_users(group_to_users, category_name):
+  output = []
+  user_to_retention_info = get_user_to_retention_info()
+  for group,user_list in group_to_users.items():
+    for user in user_list:
+      if get_is_user_unofficial(user):
+        continue
+      retention_info = user_to_retention_info[user]
+      output.append({
+        'lifetime': retention_info['lifetime'],
+        'attritioned': retention_info['attritioned'],
+        category_name: group,
+      }) 
+  return to_dataframe(output)
 
 
 
 def get_retention_info_by_frequency_of_choose_difficulty_by_install():
-  output = []
-  # todo
-  install_list = get_installs_with_choose_difficulty()
-  install_to_retention_info = get_install_to_retention_info()
-  for install in install_list:
-    if get_is_install_unofficial(install):
-      continue
-    abtest_settings = get_abtest_settings_for_install(install)
-    frequency_of_choose_difficulty = abtest_settings.get('frequency_of_choose_difficulty')
-    if frequency_of_choose_difficulty == None:
-      continue
-    conditions = get_abtest_experiment_conditions_for_install(install).get('frequency_of_choose_difficulty')
-    if conditions != ['0.0', '0.25', '0.5', '1.0']:
-      continue
-    retention_info = install_to_retention_info[install]
-    output.append({
-      'lifetime': retention_info['lifetime'],
-      'attritioned': retention_info['attritioned'],
-      'frequency_of_choose_difficulty': frequency_of_choose_difficulty,
-    })
-  return to_dataframe(output)
+  condition_to_installs = get_conditions_to_install_list_in_abtest('frequency_of_choose_difficulty', ['0.0', '0.25', '0.5', '1.0'])
+  return get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
+
+
+
+def get_retention_info_by_frequency_of_choose_difficulty_by_user():
+  condition_to_users = get_conditions_to_user_list_in_abtest('frequency_of_choose_difficulty', ['0.0', '0.25', '0.5', '1.0'])
+  return get_retention_info_for_groups_to_users(condition_to_users, 'frequency_of_choose_difficulty')
+
+
+
+# def get_retention_info_by_frequency_of_choose_difficulty_by_install():
+#   output = []
+#   install_list = get_installs_with_choose_difficulty()
+#   install_to_retention_info = get_install_to_retention_info()
+#   for install in install_list:
+#     if get_is_install_unofficial(install):
+#       continue
+#     abtest_settings = get_abtest_settings_for_install(install)
+#     frequency_of_choose_difficulty = abtest_settings.get('frequency_of_choose_difficulty')
+#     if frequency_of_choose_difficulty == None:
+#       continue
+#     conditions = get_abtest_experiment_conditions_for_install(install).get('frequency_of_choose_difficulty')
+#     if conditions != ['0.0', '0.25', '0.5', '1.0']:
+#       continue
+#     retention_info = install_to_retention_info[install]
+#     output.append({
+#       'lifetime': retention_info['lifetime'],
+#       'attritioned': retention_info['attritioned'],
+#       'frequency_of_choose_difficulty': frequency_of_choose_difficulty,
+#     })
+#   return to_dataframe(output)
 
 
 
@@ -235,27 +276,27 @@ def get_retention_info_by_frequency_of_choose_difficulty_by_install():
 
 
 
-def get_retention_info_by_frequency_of_choose_difficulty():
-  output = []
-  user_list = get_users_with_choose_difficulty()
-  user_to_retention_info = get_user_to_retention_info()
-  for user in user_list:
-    if get_is_user_unofficial(user):
-      continue
-    abtest_settings = get_abtest_settings(user)
-    frequency_of_choose_difficulty = abtest_settings.get('frequency_of_choose_difficulty')
-    if frequency_of_choose_difficulty == None:
-      continue
-    conditions = get_abtest_experiment_conditions(user).get('frequency_of_choose_difficulty')
-    if conditions != ['0.0', '0.25', '0.5', '1.0']:
-      continue
-    retention_info = user_to_retention_info[user]
-    output.append({
-      'lifetime': retention_info['lifetime'],
-      'attritioned': retention_info['attritioned'],
-      'frequency_of_choose_difficulty': frequency_of_choose_difficulty,
-    })
-  return to_dataframe(output)
+# def get_retention_info_by_frequency_of_choose_difficulty():
+#   output = []
+#   user_list = get_users_with_choose_difficulty()
+#   user_to_retention_info = get_user_to_retention_info()
+#   for user in user_list:
+#     if get_is_user_unofficial(user):
+#       continue
+#     abtest_settings = get_abtest_settings(user)
+#     frequency_of_choose_difficulty = abtest_settings.get('frequency_of_choose_difficulty')
+#     if frequency_of_choose_difficulty == None:
+#       continue
+#     conditions = get_abtest_experiment_conditions(user).get('frequency_of_choose_difficulty')
+#     if conditions != ['0.0', '0.25', '0.5', '1.0']:
+#       continue
+#     retention_info = user_to_retention_info[user]
+#     output.append({
+#       'lifetime': retention_info['lifetime'],
+#       'attritioned': retention_info['attritioned'],
+#       'frequency_of_choose_difficulty': frequency_of_choose_difficulty,
+#     })
+#   return to_dataframe(output)
 
 
 

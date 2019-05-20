@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 36b13cfd7c8184ac9beee4052e2af6ab
+# md5: e15dc3c779f368d6436b2aeef1b0b397
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -39,9 +39,17 @@ def plot_heatmap(heatmap_data):
   data = [go.Heatmap(z=heatmap_data)]
   iplot(data)
 
+def plot_dictdict_as_bar(d_dict):
+  data = []
+  for label,d in d_dict.items():
+    items = list(d.items())
+    items.sort(key=lambda x: x[1], reverse=True)
+    data.append(go.Bar(x=[x for x,y in items], y=[y for x,y in items], name=label))
+  iplot(data)
 
 
 
+# plot_dictdict_as_bar({'first': {'a': 3, 'b': 5}, 'second': {'a': 4, 'b': 6}})
 
 
 
