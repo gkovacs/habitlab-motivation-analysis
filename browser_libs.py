@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: e9dff3adb63c335da83d59c99d47b118
+# md5: 6a0f6b569143ba367bbae7f185c81d05
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -106,9 +106,13 @@ def get_collection_items(collection_name):
 def get_collection_for_user(user, collection_name):
   return get_collection_items(user + '_' + collection_name)
 
-def get_collection_for_install_id(install_id, collection_name):
-  pass
-  # TODO
+def get_collection_for_install(install_id, collection_name):
+  install_id_to_user = get_install_id_to_user()
+  user = install_id_to_user.get(install_id)
+  if user == None:
+    return []
+  items = get_collection_for_user(user, collection_name)
+  return [x for x in items if x.get('install_id') == install_id]
 
 
 
@@ -205,6 +209,13 @@ def get_all_install_ids_for_user(user):
       output_set.add(install_id)
       output.append(install_id)
   return output
+
+def get_is_install_unofficial(install_id):
+  install_id_to_user = get_install_id_to_user()
+  user = install_id_to_user.get(install_id)
+  if user == None:
+    return True
+  return get_is_user_unofficial(user)
 
 @msgpackmemo1arg
 def get_is_user_unofficial(user):

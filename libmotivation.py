@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-# md5: 29c61ff8ffc6c6c1726bca72086fc7fc
+# md5: f7c9ea781ea29e52fbc7950fad45d5d8
 #!/usr/bin/env python
 # coding: utf-8
 
 
 
 import math
-from browser_libs import get_collection_items, get_collection_names, get_collection_for_user
+from browser_libs import get_collection_items, get_collection_names, get_collection_for_user, get_collection_for_install, get_is_install_unofficial, get_is_user_unofficial
 from memoize import memoize # pip install memoize2
 from collections import Counter
 import pandas as pd
@@ -19,7 +19,33 @@ init_notebook_mode(connected=True)
 
 
 
-@memoize
+from getsecret import getsecret
+import jsonmemo as jsonmemo_module
+#jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'), lowmem=True)
+jsonmemo_funcs = jsonmemo_module.create_jsonmemo_funcs(getsecret('DATA_DUMP'))
+jsonmemo1arg = jsonmemo_funcs['jsonmemo1arg']
+jsonmemo = jsonmemo_funcs['jsonmemo']
+mparrmemo = jsonmemo_funcs['mparrmemo']
+msgpackmemo1arg = jsonmemo_funcs['msgpackmemo1arg']
+msgpackmemo = jsonmemo_funcs['msgpackmemo']
+
+
+
+@msgpackmemo
+def get_installs_with_choose_difficulty():
+  output = set()
+  user_list = get_users_with_choose_difficulty()
+  for user in user_list:
+    for item in get_collection_items(user + '_internal:choose_difficulty'):
+      install_id = item.get('install_id')
+      if install_id == None:
+        continue
+      output.add(install_id)
+  return sorted(list(output))
+
+
+
+@msgpackmemo
 def get_users_with_choose_difficulty():
   collection_names = get_collection_names()
   output = []
@@ -192,6 +218,66 @@ def get_breakdown_for_one_tried():
 
 
 
+def get_conditions_to_install_list_in_abtest(abtest_name, abtest_conditions):
+  output = {}
+  for install in get_installs_with_choose_difficulty():
+    abtest_settings = get_abtest_settings_for_install(install)
+    if abtest_name not in abtest_settings:
+      continue
+    condition = abtest_settings[abtest_name]
+    all_abtest_conditions = get_abtest_experiment_conditions_for_install(install)
+    if abtest_name not in all_abtest_conditions:
+      continue
+    all_conditions = all_abtest_conditions[abtest_name]
+    if all_conditions != abtest_conditions:
+      continue
+    if condition not in output:
+      output[condition] = []
+    output[condition].append(install)
+  return output
+
+# print(get_conditions_to_install_list_in_abtest('frequency_of_choose_difficulty', ['0.0', '0.25', '0.5', '1.0']))
+
+
+
+def get_conditions_to_user_list_in_abtest(abtest_name, abtest_conditions):
+  output = {}
+  for user in get_users_with_choose_difficulty():
+    abtest_settings = get_abtest_settings(user)
+    if abtest_name not in abtest_settings:
+      continue
+    condition = abtest_settings[abtest_name]
+    all_abtest_conditions = get_abtest_experiment_conditions(user)
+    if abtest_name not in all_abtest_conditions:
+      continue
+    all_conditions = all_abtest_conditions[abtest_name]
+    if all_conditions != abtest_conditions:
+      continue
+    if condition not in output:
+      output[condition] = []
+    output[condition].append(user)
+  return output
+
+#print(get_conditions_to_user_list_in_abtest('frequency_of_choose_difficulty', ['0.0', '0.25', '0.5', '1.0']))
+
+
+
+@memoize
+def get_abtest_settings_for_install(install_id):
+  output = {}
+  collection_items = get_collection_for_install(install_id, 'synced:experiment_vars')
+  for item in collection_items:
+    if 'key' not in item:
+      continue
+    if 'val' not in item:
+      continue
+    key = item['key']
+    val = item['val']
+    output[key] = val
+  return output
+
+
+
 @memoize
 def get_abtest_settings(user):
   output = {}
@@ -204,6 +290,32 @@ def get_abtest_settings(user):
     key = item['key']
     val = item['val']
     output[key] = val
+  return output
+
+
+
+def get_abtest_experiment_conditions(user):
+  items = get_collection_for_user(user, 'synced:experiment_vars')
+  output = {}
+  for x in items:
+    if 'conditions' not in x:
+      continue
+    key = x['key']
+    conditions = x['conditions']
+    output[key] = conditions
+  return output
+
+
+
+def get_abtest_experiment_conditions_for_install(install_id):
+  items = get_collection_for_install(install_id, 'synced:experiment_vars')
+  output = {}
+  for x in items:
+    if 'conditions' not in x:
+      continue
+    key = x['key']
+    conditions = x['conditions']
+    output[key] = conditions
   return output
 
 

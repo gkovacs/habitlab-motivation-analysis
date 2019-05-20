@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 2c7f0ecfb8594cd2bce648a68b9a92a3
+# md5: 0a4be9ca747483d876cf8d826e57c6b0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -163,7 +163,19 @@ def get_user_to_retention_info():
 
 
 
-
+@msgpackmemo
+def get_install_to_retention_info():
+  output = {}
+  dump_epoch = get_dump_epoch()
+  for install,dates_active in get_install_to_dates_active_list().items():
+    epochs_active = sorted([convert_date_to_epoch(x) for x in dates_active])
+    first_active = epochs_active[0]
+    last_active = epochs_active[-1]
+    days_alive = last_active - first_active
+    is_alive = (dump_epoch - last_active) <= 4
+    attritioned = not is_alive
+    output[install] = {'lifetime': days_alive, 'attritioned': attritioned}
+  return output
 
 
 
@@ -190,16 +202,36 @@ def get_all_user_retentions_dataframe():
 
 
 
-def get_abtest_experiment_conditions(user):
-  items = get_collection_for_user(user, 'synced:experiment_vars')
-  output = {}
-  for x in items:
-    if 'conditions' not in x:
+
+
+
+
+def get_retention_info_by_frequency_of_choose_difficulty_by_install():
+  output = []
+  # todo
+  install_list = get_installs_with_choose_difficulty()
+  install_to_retention_info = get_install_to_retention_info()
+  for install in install_list:
+    if get_is_install_unofficial(install):
       continue
-    key = x['key']
-    conditions = x['conditions']
-    output[key] = conditions
-  return output
+    abtest_settings = get_abtest_settings_for_install(install)
+    frequency_of_choose_difficulty = abtest_settings.get('frequency_of_choose_difficulty')
+    if frequency_of_choose_difficulty == None:
+      continue
+    conditions = get_abtest_experiment_conditions_for_install(install).get('frequency_of_choose_difficulty')
+    if conditions != ['0.0', '0.25', '0.5', '1.0']:
+      continue
+    retention_info = install_to_retention_info[install]
+    output.append({
+      'lifetime': retention_info['lifetime'],
+      'attritioned': retention_info['attritioned'],
+      'frequency_of_choose_difficulty': frequency_of_choose_difficulty,
+    })
+  return to_dataframe(output)
+
+
+
+
 
 
 
@@ -208,6 +240,8 @@ def get_retention_info_by_frequency_of_choose_difficulty():
   user_list = get_users_with_choose_difficulty()
   user_to_retention_info = get_user_to_retention_info()
   for user in user_list:
+    if get_is_user_unofficial(user):
+      continue
     abtest_settings = get_abtest_settings(user)
     frequency_of_choose_difficulty = abtest_settings.get('frequency_of_choose_difficulty')
     if frequency_of_choose_difficulty == None:
@@ -222,30 +256,6 @@ def get_retention_info_by_frequency_of_choose_difficulty():
       'frequency_of_choose_difficulty': frequency_of_choose_difficulty,
     })
   return to_dataframe(output)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -284,6 +294,8 @@ def plot_attrition(pandas_df, varname):
 
 
 
+
+
 def make_retention_info_for_user_groups(group_name_to_user_list):
   
 
@@ -292,7 +304,7 @@ def compare_attrition_for_user_groups(group_name_to_user_list):
 
 
 
-plot_attrition(get_retention_info_by_frequency_of_choose_difficulty(), 'frequency_of_choose_difficulty')
+
 
 
 
