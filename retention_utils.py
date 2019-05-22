@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 3dee93e1d89fc86b53e8a65fd132c4fb
+# md5: 5089efa7ae601400de24986670dfd443
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -10,6 +10,7 @@ from r_utils import r, r_assign
 
 
 from train_utils import *
+
 
 
 
@@ -338,6 +339,11 @@ def plot_attrition(pandas_df, varname):
 def make_attrition_plot_by_install_for_frequency_of_choose_difficulty():
   plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_install(), 'frequency_of_choose_difficulty')
 
+
+
+
+def make_attrition_plot_by_user_for_frequency_of_choose_difficulty():
+  plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_user(), 'frequency_of_choose_difficulty')
 
 
 

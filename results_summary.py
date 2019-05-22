@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 41233687905a5b48a3bf5958df2395ef
+# md5: 5412eee5ef178efdd2fd84872da557c9
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -17,5 +17,13 @@ plot_initial_chosen_difficulties()
 # 
 
 
+from cost_utils_libs import plot_latency_for_all_users_nonrandom
+plot_latency_for_all_users_nonrandom()
 
+
+# Unfortunately conditions where you ask users have significantly higher attrition rates. Key difference seems to be more of “do you ask them at all” rather than how often (doesn’t seem to be much difference between 1.0 and 0.5).
+
+
+from retention_utils import make_attrition_plot_by_install_for_frequency_of_choose_difficulty
+make_attrition_plot_by_install_for_frequency_of_choose_difficulty()
 
