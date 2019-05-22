@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 8d9746eacb6559ef293f533250c452a0
+# md5: 3dee93e1d89fc86b53e8a65fd132c4fb
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -335,100 +335,9 @@ def plot_attrition(pandas_df, varname):
 
 
 
-
-
-def make_retention_info_for_user_groups(group_name_to_user_list):
-  
-
-def compare_attrition_for_user_groups(group_name_to_user_list):
-  
+def make_attrition_plot_by_install_for_frequency_of_choose_difficulty():
+  plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_install(), 'frequency_of_choose_difficulty')
 
 
 
-
-
-
-
-df = get_retention_info_by_frequency_of_choose_difficulty()
-
-
-
-
-
-
-
-r('''
-library("survival")
-library("survminer")
-''')
-
-
-
-#def plot_retention(df):
-  
-
-
-
-#df = get_all_user_retentions_dataframe()
-#r.assign('df', df)
-
-
-
-print(df)
-
-
-
-#r('''
-#install.packages("survival")
-#''')
-
-
-
-
-
-
-
-r('''
-library("survival")
-library("survminer")
-fit <- survfit(Surv(lifetime, attritioned) ~ frequency_of_choose_difficulty, data=df)
-summary(fit)
-''')
-
-
-
-get_ipython().run_line_magic('load_ext', 'rpy2.ipython')
-
-
-
-get_ipython().run_cell_magic('R', '', 'df$lifetime <- as.numeric(df$lifetime)\ndf$attritioned <- as.logical(df$attritioned)\ndf$frequency_of_choose_difficulty <- as.factor(df$frequency_of_choose_difficulty)')
-
-
-
-get_ipython().run_cell_magic('R', '', 'summary(df)')
-
-
-
-get_ipython().run_cell_magic('R', '-w 1000', 'ggsurvplot(fit,\n          pval = TRUE, conf.int = TRUE,\n          risk.table = TRUE, # Add risk table\n          risk.table.col = "strata", # Change risk table color by groups\n          linetype = "strata", # Change line type by groups\n          surv.median.line = "hv", # Specify median survival\n          ggtheme = theme_bw(), # Change ggplot2 theme\n)')
-
-
-
-print(get_all_user_retentions_dataframe())
-
-
-
-to_dataframe([{'a': 3, 'b': 5}, {'a': 4, 'b': 6}])
-
-
-
-r.assign('a', to_dataframe([{'a': 3, 'b': 5}, {'a': 4, 'b': 6}]))
-
-
-
-#r.assign('a', 5)
-r('''show(a)''')
-
-
-
-r('''a <- 3''')
 

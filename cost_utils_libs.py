@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 7e2e8be2b2e2a6b37b1b841cfbc7bf0b
+# md5: 62191f258a4b71cb487b0f6a028f9d30
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -718,5 +718,91 @@ def plot_response_rate_correctness_per_hour():
 
 
 
+def plot_latency_for_all_users_nonrandom():
+  latency_list_all = []
+  user_to_install_ids = get_user_to_all_install_ids()
+  for user in get_users():
+    if user not in user_to_install_ids:
+      continue
+    if len(user_to_install_ids[user]) != 1:
+      continue
+    impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+    #get_impressions_paired_with_actions(user)
+    for x in actions_info_list:
+      if not x['is_paired']:
+        continue
+      if 'is_random' not in x:
+        continue
+      if x['is_random'] == True:
+        continue
+      tab_id = x['tab_id']
+      session_id = x['session_id']
+      action_timestamp = x['timestamp_local']
+      impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+      impression_timestamp = impression_info['timestamp_local']
+      latency = (action_timestamp - impression_timestamp) / 1000
+      if not (0 < latency < 30):
+        continue
+      latency_list_all.append(latency)
+  #x = np.random.randn(500)
+  data = [go.Histogram(x=latency_list_all)]
+  iplot(data)
 
+
+
+def plot_latency_for_all_users_random():
+  latency_list_all = []
+  user_to_install_ids = get_user_to_all_install_ids()
+  for user in get_users():
+    if user not in user_to_install_ids:
+      continue
+    if len(user_to_install_ids[user]) != 1:
+      continue
+    impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+    #get_impressions_paired_with_actions(user)
+    for x in actions_info_list:
+      if not x['is_paired']:
+        continue
+      if 'is_random' not in x:
+        continue
+      if x['is_random'] == False:
+        continue
+      tab_id = x['tab_id']
+      session_id = x['session_id']
+      action_timestamp = x['timestamp_local']
+      impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+      impression_timestamp = impression_info['timestamp_local']
+      latency = (action_timestamp - impression_timestamp) / 1000
+      if not (0 < latency < 30):
+        continue
+      latency_list_all.append(latency)
+  data = [go.Histogram(x=latency_list_all)]
+  iplot(data)
+
+
+
+def plot_latency_for_all_users_random_and_nonrandom():
+  latency_list_all = []
+  user_to_install_ids = get_user_to_all_install_ids()
+  for user in get_users():
+    if user not in user_to_install_ids:
+      continue
+    if len(user_to_install_ids[user]) != 1:
+      continue
+    impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+    #get_impressions_paired_with_actions(user)
+    for x in actions_info_list:
+      if not x['is_paired']:
+        continue
+      tab_id = x['tab_id']
+      session_id = x['session_id']
+      action_timestamp = x['timestamp_local']
+      impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+      impression_timestamp = impression_info['timestamp_local']
+      latency = (action_timestamp - impression_timestamp) / 1000
+      if not (0 < latency < 30):
+        continue
+      latency_list_all.append(latency)
+  data = [go.Histogram(x=latency_list_all)]
+  iplot(data)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: e7d26e3787d227fd25e04cf9a9e6649a
+# md5: 43444d154b42c13f17616a747a07d541
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -44,181 +44,53 @@ def plot_time_since_last_impression_by_action():
 
 
 
+# def plot_latency_for_individual_user():
+#   impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
+#   #print(tab_id_to_session_id_to_impressions.keys())
+#   latency_list = []
+#   for x in actions_info_list:
+#     if not x['is_paired']:
+#       continue
+#     tab_id = x['tab_id']
+#     session_id = x['session_id']
+#     action_timestamp = x['timestamp_local']
+#     impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+#     impression_timestamp = impression_info['timestamp_local']
+#     latency = (action_timestamp - impression_timestamp) / 1000
+#     if latency > 30:
+#       continue
+#     latency_list.append(latency)
+#   from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+#   import plotly.graph_objs as go
+
+#   import numpy as np
+#   #x = np.random.randn(500)
+#   data = [go.Histogram(x=latency_list)]
+
+#   iplot(data)
+
+#plot_latency_for_individual_user()
 
 
 
 
-impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions('8d2c9eb27dee2dc85bca705b')
 
 
+# almost everything below this is broken
 
-print(tab_id_to_session_id_to_impressions.keys())
+def print_misc_computations_cost_utils():
+  prev_timestamp = 0
+  for x in impressions_info_list:
+    print(x['is_paired'], x['install_id'], x['url'], x['tab_id'], x['session_id'], (x['timestamp_local'] - prev_timestamp) / 1000)
+    prev_timestamp = x['timestamp_local']
 
-
-
-latency_list = []
-for x in actions_info_list:
-  if not x['is_paired']:
-    continue
-  tab_id = x['tab_id']
-  session_id = x['session_id']
-  action_timestamp = x['timestamp_local']
-  impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
-  impression_timestamp = impression_info['timestamp_local']
-  latency = (action_timestamp - impression_timestamp) / 1000
-  if latency > 30:
-    continue
-  latency_list.append(latency)
-
-
-
-from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-import plotly.graph_objs as go
-
-import numpy as np
-
-
-
-#x = np.random.randn(500)
-data = [go.Histogram(x=latency_list)]
-
-iplot(data)
-
-
-
-latency_list_all = []
-for user in get_users():
-  if user not in user_to_install_ids:
-    continue
-  if len(user_to_install_ids[user]) != 1:
-    continue
-  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
-  #get_impressions_paired_with_actions(user)
-  for x in actions_info_list:
-    if not x['is_paired']:
+def print_misc_computations_cost_utils_2():
+  for user in get_users():
+    response_rate = get_non_response_rates_for_user(user)
+    if response_rate == None:
       continue
-    if 'is_random' not in x:
-      continue
-    if x['is_random'] == True:
-      continue
-    tab_id = x['tab_id']
-    session_id = x['session_id']
-    action_timestamp = x['timestamp_local']
-    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
-    impression_timestamp = impression_info['timestamp_local']
-    latency = (action_timestamp - impression_timestamp) / 1000
-    if not (0 < latency < 30):
-      continue
-    latency_list_all.append(latency)
+    print(response_rate)
 
-
-
-#x = np.random.randn(500)
-data = [go.Histogram(x=latency_list_all)]
-
-iplot(data)
-
-
-
-
-
-
-
-latency_list_all = []
-for user in get_users():
-  if user not in user_to_install_ids:
-    continue
-  if len(user_to_install_ids[user]) != 1:
-    continue
-  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
-  #get_impressions_paired_with_actions(user)
-  for x in actions_info_list:
-    if not x['is_paired']:
-      continue
-    if 'is_random' not in x:
-      continue
-    if x['is_random'] == False:
-      continue
-    tab_id = x['tab_id']
-    session_id = x['session_id']
-    action_timestamp = x['timestamp_local']
-    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
-    impression_timestamp = impression_info['timestamp_local']
-    latency = (action_timestamp - impression_timestamp) / 1000
-    if not (0 < latency < 30):
-      continue
-    latency_list_all.append(latency)
-
-
-
-latency_list_all = []
-for user in get_users():
-  if user not in user_to_install_ids:
-    continue
-  if len(user_to_install_ids[user]) != 1:
-    continue
-  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
-  #get_impressions_paired_with_actions(user)
-  for x in actions_info_list:
-    if not x['is_paired']:
-      continue
-    if 'is_random' not in x:
-      continue
-    if x['is_random'] == False:
-      continue
-    tab_id = x['tab_id']
-    session_id = x['session_id']
-    action_timestamp = x['timestamp_local']
-    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
-    impression_timestamp = impression_info['timestamp_local']
-    latency = (action_timestamp - impression_timestamp) / 1000
-    if not (0 < latency < 30):
-      continue
-    latency_list_all.append(latency)
-
-
-
-#x = np.random.randn(500)
-data = [go.Histogram(x=latency_list_all)]
-
-iplot(data)
-
-
-
-latency_list_all = []
-for user in get_users():
-  if user not in user_to_install_ids:
-    continue
-  if len(user_to_install_ids[user]) != 1:
-    continue
-  impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
-  #get_impressions_paired_with_actions(user)
-  for x in actions_info_list:
-    if not x['is_paired']:
-      continue
-    tab_id = x['tab_id']
-    session_id = x['session_id']
-    action_timestamp = x['timestamp_local']
-    impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
-    impression_timestamp = impression_info['timestamp_local']
-    latency = (action_timestamp - impression_timestamp) / 1000
-    if not (0 < latency < 30):
-      continue
-    latency_list_all.append(latency)
-
-
-
-#x = np.random.randn(500)
-data = [go.Histogram(x=latency_list_all)]
-
-iplot(data)
-
-
-
-prev_timestamp = 0
-for x in impressions_info_list:
-  print(x['is_paired'], x['install_id'], x['url'], x['tab_id'], x['session_id'], (x['timestamp_local'] - prev_timestamp) / 1000)
-  prev_timestamp = x['timestamp_local']
 
 
 
@@ -235,7 +107,6 @@ def get_impression_times_prompted_for_user(user):
     output.append(impression_time)
   return output
 
-get_impression_times_prompted_for_user('8d2c9eb27dee2dc85bca705b')
 
 
 
@@ -249,9 +120,5 @@ def get_response_latencies_for_user(user):
 
 
 
-for user in get_users():
-  response_rate = get_non_response_rates_for_user(user)
-  if response_rate == None:
-    continue
-  print(response_rate)
+
 
