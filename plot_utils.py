@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: e15dc3c779f368d6436b2aeef1b0b397
+# md5: d9bca219841433b43d887046083ce24d
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -11,41 +11,85 @@ init_notebook_mode(connected=True)
 
 
 
-def plot_histogram(x_values):
+def plot_data(data, **kwargs):
+  title = kwargs.get('title')
+  xlabel = kwargs.get('xlabel')
+  ylabel = kwargs.get('ylabel')
+  
+  layout = go.Layout()
+  if title is not None:
+    layout.title = go.layout.Title(text = title)
+  if xlabel is not None:
+    layout.xaxis = go.layout.XAxis(title = xlabel)
+  if ylabel is not None:
+    layout.yaxis = go.layout.YAxis(title = ylabel)
+  fig = go.Figure(data=data, layout=layout)
+  iplot(fig)
+
+def plot_histogram(x_values, **kwargs):
   data = [go.Histogram(x=x_values)]
-  iplot(data)
+  plot_data(data, **kwargs)
 
-def plot_points(points):
+def plot_points(points, **kwargs):
   data = [go.Scatter(x=[x for x,y in points], y=[y for x,y in points])]
-  iplot(data)
+  plot_data(data, **kwargs)
 
-def plot_several_points(points_list):
+def plot_several_points(points_list, **kwargs):
   data = []
   for label,points in points_list:
     data.append(go.Scatter(x=[x for x,y in points], y=[y for x,y in points], name=label))
-  iplot(data)
+  plot_data(data, **kwargs)
 
-def plot_bar(label_with_value_list):
+def plot_bar(label_with_value_list, **kwargs):
   data = [go.Bar(x=[x for x,y in label_with_value_list], y=[y for x,y in label_with_value_list])]
-  iplot(data)
+  plot_data(data, **kwargs)
 
-def plot_dict_as_bar(d):
+def plot_dict_as_bar(d, **kwargs):
   data = []
   items = list(d.items())
   items.sort(key=lambda x: x[1], reverse=True)
-  plot_bar(items)
+  plot_bar(items, **kwargs)
 
-def plot_heatmap(heatmap_data):
-  data = [go.Heatmap(z=heatmap_data)]
-  iplot(data)
+def plot_heatmap(heatmap_data, **kwargs):
+  ticktext = kwargs.get('ticktext')
+  colorscale = kwargs.get('colorscale')
+  
+  heatmap = go.Heatmap(z = heatmap_data)
+  heatmap.colorscale = 'Viridis' # Greys
+  if colorscale is not None:
+    heatmap.colorscale = colorscale
+  heatmap.showscale = True
+  if ticktext is not None:
+    heatmap.colorbar = dict(
+      tickmode = 'array',
+      tickvals = list(range(len(ticktext))),
+      ticktext = ticktext,
+    )
+  data = [ heatmap ]
+  plot_data(data, **kwargs)
 
-def plot_dictdict_as_bar(d_dict):
+def plot_dictdict_as_bar(d_dict, **kwargs):
   data = []
   for label,d in d_dict.items():
     items = list(d.items())
     items.sort(key=lambda x: x[1], reverse=True)
     data.append(go.Bar(x=[x for x,y in items], y=[y for x,y in items], name=label))
-  iplot(data)
+  plot_data(data, **kwargs)
+
+
+
+#print(go.Heatmap.colorbar)
+#print(go.nticks)
+
+
+
+# plot_heatmap(
+#   [[3,5],[6,7]],
+#   ticktext=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
+#   title='Plot title',
+#   xlabel='x label',
+#   ylabel='y label',
+# )
 
 
 

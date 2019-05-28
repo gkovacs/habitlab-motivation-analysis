@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 1c1b4b95c3a1a258ab27ae501e36c699
+# md5: bb891aa94bae73710984139014dcb43d
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -14,8 +14,8 @@ jsonmemo_module.set_lowmem(True)
 # Ie, if you ask them during onboarding the following question "How aggressive would you like HabitLab to be in reducing your time online" then the answers are as follows
 
 
-from initial_difficulty_choice_utils import plot_initial_chosen_difficulties
-plot_initial_chosen_difficulties()
+from initial_difficulty_choice_utils import plot_initial_chosen_difficulties_per_install
+plot_initial_chosen_difficulties_per_install()
 
 
 # First study: all users are in the 10-second countdown version of the interface. We vary the frequency with which they are shown the prompt. 4 conditions: shown prompt on 100% of visits, 50%, 25%, 0%.
@@ -68,6 +68,8 @@ from cost_utils_libs import plot_response_rate_since_last_impression_per_hour_on
 plot_response_rate_since_last_impression_per_hour_oneweek()
 
 
+# Now if we look at difficulty chosen over time, it looks stable
+
 
 from cost_utils_libs import plot_difficulty_chosen_since_first_impression_per_week
 plot_difficulty_chosen_since_first_impression_per_week()
@@ -83,9 +85,11 @@ plot_difficulty_choices_heatmap()
 # How often do users want to be asked about difficulty? It seems people gravitate towards extremes. Either every time, or as little as possible
 
 
-from survey_asknext import plot_survey_choice_counts_user_normalized
-plot_survey_choice_counts_user_normalized()
+from survey_asknext import plot_survey_choice_counts_install_normalized
+plot_survey_choice_counts_install_normalized()
 
+
+# Hope is eternal: Don’t want an intervention this visit, but ask next time
 
 
 from survey_asknext import plot_survey_choice_to_difficulty_choice_counts

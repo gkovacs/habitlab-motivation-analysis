@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 558ca5643ec6e0f1e58d07714c7d2b8f
+# md5: b36cd10cb9eb8eb5500687bce9157866
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -154,6 +154,16 @@ def get_language_indexes_for_user(user):
   language_to_idx = get_language_to_index()
   languages = get_languages_for_user(user)
   return [language_to_idx[language] for language in languages]
+
+
+
+def get_initial_difficulty_for_install(install):
+  abtest_settings = get_abtest_settings_for_install(install)
+  #return abtest_settings.get('user_chosen_difficulty_survey', None)
+  difficulty = abtest_settings.get('user_chosen_difficulty', None)
+  #if difficulty == None:
+  #  difficulty = abtest_settings.get('user_chosen_difficulty_survey', None)
+  return difficulty
 
 
 

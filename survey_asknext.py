@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 94ea0ac623af3a4b7b6409af453781c2
+# md5: e1b418d94a87a267032c2628a647c168
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -24,7 +24,18 @@ def get_most_common_survey_result_for_user(user):
   results = get_survey_results_for_user(user)
   return get_most_common_key_in_dict(results)
 
+def get_most_common_survey_result_for_install(install):
+  results = get_survey_results_for_install(install)
+  return get_most_common_key_in_dict(results)
 
+
+
+def get_survey_results_across_all_installs():
+  output = Counter()
+  for install in get_installs_with_asknext_survey():
+    for k,v in get_survey_results_for_install(install).items():
+      output[k] += v
+  return output
 
 def get_survey_results_across_all_users():
   output = Counter()
@@ -34,6 +45,19 @@ def get_survey_results_across_all_users():
   return output
 
 
+
+def get_survey_results_for_install(install):
+  output = Counter()
+  collection_items = get_collection_for_install(install, 'internal:choose_difficulty')
+  for item in collection_items:
+    if ('developer_mode' in item) and (item['developer_mode'] == True):
+      continue
+    if ('unofficial_version' in item):
+      continue
+    if 'action_type' in item and item['action_type'] == 'asknext_chosen':
+      asknext = item['asknext']
+      output[asknext] += 1
+  return output
 
 def get_survey_results_for_user(user):
   output = Counter()
@@ -50,6 +74,15 @@ def get_survey_results_for_user(user):
 
 
 
+def get_installs_with_asknext_survey():
+  output = []
+  installs_with_difficulty = get_installs_with_choose_difficulty()
+  for install in installs_with_difficulty:
+    abtest_settings = get_abtest_settings_for_install(install)
+    if abtest_settings.get('frequency_of_choose_difficulty') == 'survey':
+      output.append(install)
+  return output
+
 def get_users_with_asknext_survey():
   output = []
   users_with_difficulty = get_users_with_choose_difficulty()
@@ -60,6 +93,15 @@ def get_users_with_asknext_survey():
   return output
 
 
+
+def get_survey_choice_to_num_installs_who_choose_it_most_commonly():
+  output = Counter()
+  for install in get_installs_with_asknext_survey():
+    most_common_result = get_most_common_survey_result_for_install(install)
+    if most_common_result == None:
+      continue
+    output[most_common_result] += 1
+  return output
 
 def get_survey_choice_to_num_users_who_choose_it_most_commonly():
   output = Counter()
@@ -104,21 +146,56 @@ def get_survey_choice_to_difficulty_choice_counts():
   return output
 
 def plot_survey_choice_to_difficulty_choice_counts():
-  plot_dictdict_as_bar(get_survey_choice_to_difficulty_choice_counts())
+  plot_dictdict_as_bar(
+    get_survey_choice_to_difficulty_choice_counts(),
+    ylabel = 'Number of times chosen',
+    xlabel = 'Intervention difficulty chosen, along with when to ask about difficulty again',
+    title = 'Choices for intervention difficulty and when to ask about difficulty again',
+  )
 
-def plot_survey_choice_counts_raw():
+def plot_survey_choice_counts_raw_per_user():
   survey_results = get_survey_results_across_all_users()
   print(survey_results)
   print(chisquare(list(survey_results.values())))
-  plot_dict_as_bar(survey_results)
+  plot_dict_as_bar(
+    survey_results,
+    ylabel = 'Number of times chosen',
+    xlabel = 'Choice for when to ask next about intervention difficulty',
+    title = 'Choice for when to ask next about intervention difficulty, raw counts'
+  )
+
+def plot_survey_choice_counts_raw_per_install():
+  survey_results = get_survey_results_across_all_installs()
+  print(survey_results)
+  print(chisquare(list(survey_results.values())))
+  plot_dict_as_bar(
+    survey_results,
+    ylabel = 'Number of times chosen',
+    xlabel = 'Choice for when to ask next about intervention difficulty',
+    title = 'Choice for when to ask next about intervention difficulty, raw counts'
+  )
+
+def plot_survey_choice_counts_install_normalized():
+  survey_choice_to_num_installs_who_choose_it_most_commonly = get_survey_choice_to_num_installs_who_choose_it_most_commonly()
+  print(survey_choice_to_num_installs_who_choose_it_most_commonly)
+  print(chisquare(list(survey_choice_to_num_installs_who_choose_it_most_commonly.values())))
+  plot_dict_as_bar(
+    survey_choice_to_num_installs_who_choose_it_most_commonly,
+    ylabel = 'Number of users',
+    xlabel = 'User\'s most frequent choice for when to next ask about intervention difficulty',
+    title = 'Most frequent choice for when to ask next about intervention difficulty, by number of users',
+  )
 
 def plot_survey_choice_counts_user_normalized():
   survey_choice_to_num_users_who_choose_it_most_commonly = get_survey_choice_to_num_users_who_choose_it_most_commonly()
   print(survey_choice_to_num_users_who_choose_it_most_commonly)
   print(chisquare(list(survey_choice_to_num_users_who_choose_it_most_commonly.values())))
-  plot_dict_as_bar(survey_choice_to_num_users_who_choose_it_most_commonly)
-
-
+  plot_dict_as_bar(
+    survey_choice_to_num_users_who_choose_it_most_commonly,
+    ylabel = 'Number of users',
+    xlabel = 'User\'s most frequent choice for when to next ask about intervention difficulty',
+    title = 'Most frequent choice for when to ask next about intervention difficulty, by number of users',
+  )
 
 
 

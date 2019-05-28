@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b9c2d0ebbfd82e5b363fd110ade91548
+# md5: 90c142e9afd2a3769821a3c5d2ed9f6f
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -111,16 +111,34 @@ def get_israndom_choices_heatmap():
 
 
 
+import plot_utils
+reload(plot_utils)
+from plot_utils import *
+
 def plot_israndom_choices_heatmap():
   heatmap_data = get_israndom_choices_heatmap()
-  plot_heatmap(heatmap_data)
+  plot_heatmap(
+    heatmap_data,
+    title = 'Changes in user willingness to choose intervention difficulty over time',
+    xlabel = 'How manyth time the user is seeing the difficulty selection prompt',
+    ylabel = 'User index',
+    #colorscale = 'Greys',
+    ticktext = ['User chose', 'No choice (random)'],
+  )
 
 
 
 
 def plot_difficulty_choices_heatmap():
   heatmap_data = get_difficulty_choices_heatmap()
-  plot_heatmap(heatmap_data)
+  plot_heatmap(
+    heatmap_data,
+    title = 'Changes in user difficulty choices over time',
+    xlabel = 'How manyth time the user is choosing difficulty',
+    ylabel = 'User index',
+    #colorscale = 'Greys',
+    ticktext = ['Nothing', 'Easy', 'Medium', 'Hard'],
+  )
 
 
 

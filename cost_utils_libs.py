@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 63a2b5c08b777cc89901b5a84a8d6178
+# md5: 63ec0efcdc05c0f12749a3aa8445111d
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -701,7 +701,12 @@ from plot_utils import *
 
 def plot_difficulty_chosen_since_first_impression_per_week():
   difficulty_with_hours_and_fractions = group_as_difficulty_per_week(get_time_since_first_impression_and_difficulty_chosen())
-  plot_several_points(difficulty_with_hours_and_fractions)
+  plot_several_points(
+    difficulty_with_hours_and_fractions,
+    ylabel = 'Probability of choosing intervention difficulty',
+    xlabel = 'Weeks elapsed since install',
+    title = 'Intervention difficulty chosen, as function of weeks elapsed since install',
+  )
 
 def plot_difficulty_chosen_since_first_impression_per_hour():
   difficulty_with_hours_and_fractions = group_as_difficulty_per_hour(get_time_since_last_impression_and_difficulty_chosen())
@@ -709,7 +714,12 @@ def plot_difficulty_chosen_since_first_impression_per_hour():
 
 def plot_difficulty_chosen_since_first_impression_per_hour_oneweek():
   difficulty_with_hours_and_fractions = group_as_difficulty_per_hour_oneweek(get_time_since_last_impression_and_difficulty_chosen())
-  plot_several_points(difficulty_with_hours_and_fractions)
+  plot_several_points(
+    difficulty_with_hours_and_fractions,
+    ylabel = 'Probability of choosing intervention difficulty',
+    xlabel = 'Hours elapsed since install',
+    title = 'Intervention difficulty chosen, as function of hours elapsed since install',
+  )
 
 def plot_response_rate_since_first_impression_per_day():
   response_rate_per_day = group_as_response_rate_per_day(get_time_since_first_impression_and_action_status())
@@ -717,7 +727,12 @@ def plot_response_rate_since_first_impression_per_day():
 
 def plot_response_rate_since_first_impression_per_week():
   response_rate_per_week = group_as_response_rate_per_week(get_time_since_first_impression_and_action_status())
-  plot_points(response_rate_per_week)
+  plot_points(
+    response_rate_per_week,
+    ylabel = 'Probability of answering the choose intervention difficulty prompt',
+    xlabel = 'Weeks elapsed since install',
+    title = 'Probability of anwering choose intervention difficulty prompt, as function of weeks elapsed since install',
+  )
 
 def plot_response_rate_since_last_impression_per_hour():
   response_rate_per_hour = group_as_response_rate_per_hour(get_time_since_last_impression_and_action_status())
@@ -725,7 +740,12 @@ def plot_response_rate_since_last_impression_per_hour():
 
 def plot_response_rate_since_last_impression_per_hour_oneweek():
   response_rate_per_hour_oneweek = group_as_response_rate_per_hour_oneweek(get_time_since_last_impression_and_action_status())
-  plot_points(response_rate_per_hour_oneweek)
+  plot_points(
+    response_rate_per_hour_oneweek,
+    ylabel = 'Probability of user answering the choose intervention difficulty prompt',
+    xlabel = 'Number of hours elapsed since the user last saw the difficulty prompt',
+    title = 'Probability of user answering difficulty prompt, as function of time elapsed since it was last seen',
+  )
 
 
 
@@ -774,7 +794,13 @@ def plot_latency_for_all_users_nonrandom():
       latency_list_all.append(latency)
   #x = np.random.randn(500)
   data = [go.Histogram(x=latency_list_all)]
-  iplot(data)
+  plot_data(
+    data,
+    xlabel = 'Seconds elapsed until user chooses a difficulty (only including sessions where the user made a choice)',
+    ylabel = 'Number of sessions',
+    title = 'Time needed for users to choose intervention difficulty each session',
+  )
+  #iplot(data)
 
 
 
