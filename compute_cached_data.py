@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 13ec284036deffcaf03e379a013864c1
+# md5: a3ce737659b58f620f503e2bd50d30dd
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -18,10 +18,6 @@ jsonmemo = jsonmemo_funcs['jsonmemo']
 mparrmemo = jsonmemo_funcs['mparrmemo']
 msgpackmemo1arg = jsonmemo_funcs['msgpackmemo1arg']
 msgpackmemo = jsonmemo_funcs['msgpackmemo']
-
-
-
-
 
 
 

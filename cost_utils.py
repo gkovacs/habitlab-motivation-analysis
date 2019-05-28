@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 43444d154b42c13f17616a747a07d541
+# md5: 63a5a70f40d324a490ebd8cb78b2d618
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -9,9 +9,8 @@ import imp
 import cost_utils_libs
 imp.reload(cost_utils_libs)
 from cost_utils_libs import *
-
-
-
+import jsonmemo as jsonmemo_module
+jsonmemo_module.set_lowmem(True)
 
 
 

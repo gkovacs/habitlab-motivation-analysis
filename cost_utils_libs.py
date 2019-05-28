@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 62191f258a4b71cb487b0f6a028f9d30
+# md5: 63a2b5c08b777cc89901b5a84a8d6178
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -503,6 +503,30 @@ def group_as_difficulty_per_hour(time_since_last_impression_and_difficulty_chose
     output.append((difficulty, difficulty_points))
   return output
 
+def group_as_difficulty_per_hour_oneweek(time_since_last_impression_and_difficulty_chosen):
+  difficulty_to_hour_to_counts = {
+    'nothing': Counter(),
+    'easy': Counter(),
+    'medium': Counter(),
+    'hard': Counter(),
+  }
+  for x,difficulty in time_since_last_impression_and_difficulty_chosen:
+    hour = round(x / 3600)
+    if hour > 24 * 7:
+      continue
+    difficulty_to_hour_to_counts[difficulty][hour] += 1
+  output = []
+  for difficulty in 'nothing easy medium hard'.split(' '):
+    difficulty_points = []
+    for hour in sorted(list(difficulty_to_hour_to_counts[difficulty].keys())):
+      counts = difficulty_to_hour_to_counts[difficulty][hour]
+      total_counts = 0
+      for other_difficulty in 'nothing easy medium hard'.split(' '):
+        total_counts += difficulty_to_hour_to_counts[other_difficulty].get(hour, 0)
+      fraction = counts / total_counts
+      difficulty_points.append((hour, fraction))
+    output.append((difficulty, difficulty_points))
+  return output
 
 
 def group_as_difficulty_per_day(time_since_last_impression_and_difficulty_chosen):
@@ -681,6 +705,10 @@ def plot_difficulty_chosen_since_first_impression_per_week():
 
 def plot_difficulty_chosen_since_first_impression_per_hour():
   difficulty_with_hours_and_fractions = group_as_difficulty_per_hour(get_time_since_last_impression_and_difficulty_chosen())
+  plot_several_points(difficulty_with_hours_and_fractions)
+
+def plot_difficulty_chosen_since_first_impression_per_hour_oneweek():
+  difficulty_with_hours_and_fractions = group_as_difficulty_per_hour_oneweek(get_time_since_last_impression_and_difficulty_chosen())
   plot_several_points(difficulty_with_hours_and_fractions)
 
 def plot_response_rate_since_first_impression_per_day():
