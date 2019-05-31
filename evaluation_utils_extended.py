@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 6a0c9af2d6d94b97a6f512e1592e4f07
+# md5: bb778e75c644ea7ecd418a1a2419aa41
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -287,18 +287,6 @@ def get_visit_idx_to_predictions_for_timed_sampling_rate(user, sampling_rate_sec
       last_sampled_value = difficulty
   return sampled_according_to_time
 
-
-
-def main():
-  for baseline_name in ['initial_difficulty', 'first_chosen', 'always_nothing', 'most_common_previous']:
-    print(baseline_name)
-    print(get_evaluation_results_for_named_baseline_v4(baseline_name))
-  
-  sample_every_n_visits_options = [1,2,3,4,5,7,9,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120,125,130]
-  sample_every_n_visits_options.extend(list(range(1, 1000)))
-  for sample_every_n_visits in sample_every_n_visits_options:
-    print(sample_every_n_visits)
-    print(get_evaluation_results_for_sample_every_n_visits_v3(sample_every_n_visits))
 
 
 

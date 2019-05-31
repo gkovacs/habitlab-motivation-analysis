@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 5089efa7ae601400de24986670dfd443
+# md5: b698673ab87058add1a31689b1544149
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -336,14 +336,134 @@ def plot_attrition(pandas_df, varname):
 
 
 
+def plot_attrition_for_abtest_groups_by_install(abtest_name, groups):
+  condition_to_installs = get_conditions_to_install_list_in_abtest(abtest_name, groups)
+  retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, abtest_name)
+  plot_attrition(retention_info, abtest_name)
+
+def plot_attrition_for_abtest_groups_by_user(abtest_name, groups):
+  condition_to_users = get_conditions_to_user_list_in_abtest(abtest_name, groups)
+  retention_info = get_retention_info_for_groups_to_users(condition_to_users, abtest_name)
+  plot_attrition(retention_info, abtest_name)
+
+def plot_attrition_for_abtest_groups_by_install_unstrict(abtest_name, groups):
+  condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
+  for k in list(condition_to_installs.keys()):
+    if k not in groups:
+      del condition_to_installs[k]
+  retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, abtest_name)
+  plot_attrition(retention_info, abtest_name)
+
+
+
+def get_conditions_to_install_list_in_abtest_unstrict(abtest_name):
+  output = {}
+  #for install in get_installs_with_choose_difficulty():
+  for install in get_installs_with_experiment_vars():
+    abtest_settings = get_abtest_settings_for_install(install)
+    if abtest_name not in abtest_settings:
+      continue
+    condition = abtest_settings[abtest_name]
+    #all_abtest_conditions = get_abtest_experiment_conditions_for_install(install)
+    #if abtest_name not in all_abtest_conditions:
+    #  continue
+    #all_conditions = all_abtest_conditions[abtest_name]
+    #if all_conditions != abtest_conditions:
+    #  continue
+    if condition not in output:
+      output[condition] = []
+    output[condition].append(install)
+  return output
+
+
+
+# def make_attrition_plot_by_install_for_frequency_of_choose_difficulty():
+#   plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_install(), 'frequency_of_choose_difficulty')
+
+# def make_attrition_plot_by_user_for_frequency_of_choose_difficulty():
+#   plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_user(), 'frequency_of_choose_difficulty')
+
 def make_attrition_plot_by_install_for_frequency_of_choose_difficulty():
-  plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_install(), 'frequency_of_choose_difficulty')
-
-
-
+  plot_attrition_for_abtest_groups_by_install('frequency_of_choose_difficulty', ['0.0', '0.25', '0.5', '1.0'])
 
 def make_attrition_plot_by_user_for_frequency_of_choose_difficulty():
-  plot_attrition(get_retention_info_by_frequency_of_choose_difficulty_by_user(), 'frequency_of_choose_difficulty')
+  plot_attrition_for_abtest_groups_by_user('frequency_of_choose_difficulty', ['0.0', '0.25', '0.5', '1.0'])
+
+def make_attrition_plot_by_install_for_randomized_difficulty_assignments():
+  plot_attrition_for_abtest_groups_by_install_unstrict('difficulty_selection_screen', ['survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard'])
 
 
+
+
+
+
+# def get_users_with_experiment_vars():
+#   collection_names = get_collection_names()
+#   output = []
+#   for x in collection_names:
+#     if x.endswith('_synced:experiment_vars'):
+#       user = x.replace('_synced:experiment_vars', '')
+#       output.append(user)
+#   return output
+
+# def get_installs_with_experiment_vars():
+#   output = set()
+#   user_list = get_users_with_choose_difficulty()
+#   for user in user_list:
+#     for item in get_collection_items(user + '_synced:experiment_vars'):
+#       install_id = item.get('install_id')
+#       if install_id == None:
+#         continue
+#       output.add(install_id)
+#   return sorted(list(output))
+
+
+
+#print(len(get_installs_with_experiment_vars()))
+
+
+
+
+
+# def get_abtest_settings_for_install_uncached(install_id):
+#   output = {}
+#   collection_items = get_collection_for_install(install_id, 'synced:experiment_vars')
+#   for item in collection_items:
+#     if 'key' not in item:
+#       continue
+#     if 'val' not in item:
+#       continue
+#     key = item['key']
+#     val = item['val']
+#     output[key] = val
+#     #if key == 'difficulty_selection_screen' and val != 'nodefault_forcedchoice':
+#     #  print(val)
+#   return output
+
+
+
+#condition_to_installs = get_conditions_to_install_list_in_abtest('difficulty_selection_screen', ['nodefault_optional', 'survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard'])
+#condition_to_installs = get_conditions_to_install_list_in_abtest_nocheck('difficulty_selection_screen')
+
+#print(condition_to_installs)
+#plot_attrition_for_abtest_groups_by_install('difficulty_selection_screen', ['nodefault_optional', 'survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard'])
+
+
+
+#for k,v in condition_to_installs.items():
+#  print(k, len(v))
+
+
+
+# def main():
+#   conditions_set = set()
+#   for install in get_installs_with_choose_difficulty():
+#     all_conditions = get_abtest_experiment_conditions_for_install(install)
+#     options_tested = all_conditions.get('difficulty_selection_screen')
+#     if type(options_tested) == list:
+#       options_tested = tuple(options_tested)
+#     conditions_set.add(options_tested)
+#   return conditions_set
+
+# #print(main())
 

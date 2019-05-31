@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: d9bca219841433b43d887046083ce24d
+# md5: 3652bf95530fbf560cd0b9030a8d3523
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -41,12 +41,26 @@ def plot_several_points(points_list, **kwargs):
   plot_data(data, **kwargs)
 
 def plot_bar(label_with_value_list, **kwargs):
-  data = [go.Bar(x=[x for x,y in label_with_value_list], y=[y for x,y in label_with_value_list])]
+  labels = [y for x,y in label_with_value_list]
+  remap_labels = kwargs.get('remap_labels')
+  if remap_labels is not None:
+    labels = [remap_labels.get(x, x) for x in labels]
+  data = [go.Bar(x=[x for x,y in label_with_value_list], y=labels)]
   plot_data(data, **kwargs)
 
 def plot_dict_as_bar(d, **kwargs):
   data = []
   items = list(d.items())
+  items.sort(key=lambda x: x[1], reverse=True)
+  plot_bar(items, **kwargs)
+
+def plot_dict_as_bar_percent(d, **kwargs):
+  data = []
+  nd = {}
+  val_sum = sum(d.values())
+  for k,v in d.items():
+    nd[k] = v / val_sum
+  items = list(nd.items())
   items.sort(key=lambda x: x[1], reverse=True)
   plot_bar(items, **kwargs)
 

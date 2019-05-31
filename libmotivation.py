@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: f7c9ea781ea29e52fbc7950fad45d5d8
+# md5: 61fa609bb026522bdaf8e66226feda9d
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -54,6 +54,30 @@ def get_users_with_choose_difficulty():
       user = x.replace('_internal:choose_difficulty', '')
       output.append(user)
   return output
+
+
+
+@msgpackmemo
+def get_users_with_experiment_vars():
+  collection_names = get_collection_names()
+  output = []
+  for x in collection_names:
+    if x.endswith('_synced:experiment_vars'):
+      user = x.replace('_synced:experiment_vars', '')
+      output.append(user)
+  return output
+
+@msgpackmemo
+def get_installs_with_experiment_vars():
+  output = set()
+  user_list = get_users_with_choose_difficulty()
+  for user in user_list:
+    for item in get_collection_items(user + '_synced:experiment_vars'):
+      install_id = item.get('install_id')
+      if install_id == None:
+        continue
+      output.add(install_id)
+  return sorted(list(output))
 
 
 
