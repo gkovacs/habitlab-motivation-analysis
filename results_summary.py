@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: bb891aa94bae73710984139014dcb43d
+# md5: 3c92d5559d1780b1d52ca3a80f09c821
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -14,8 +14,13 @@ jsonmemo_module.set_lowmem(True)
 # Ie, if you ask them during onboarding the following question "How aggressive would you like HabitLab to be in reducing your time online" then the answers are as follows
 
 
-from initial_difficulty_choice_utils import plot_initial_chosen_difficulties_per_install
-plot_initial_chosen_difficulties_per_install()
+from initial_difficulty_choice_utils import plot_initial_chosen_difficulties_per_install_percent
+plot_initial_chosen_difficulties_per_install_percent()
+
+
+
+from initial_difficulty_choice_utils import plot_initial_chosen_difficulties_per_install_percent
+plot_initial_chosen_difficulties_per_install_percent()
 
 
 # First study: all users are in the 10-second countdown version of the interface. We vary the frequency with which they are shown the prompt. 4 conditions: shown prompt on 100% of visits, 50%, 25%, 0%.
@@ -52,6 +57,13 @@ plot_difficulty_chosen_since_first_impression_per_hour_oneweek()
 
 from cost_utils_libs import plot_response_rate_since_first_impression_per_week
 plot_response_rate_since_first_impression_per_week()
+
+
+# If we plot it at the level of time elapsed since they last saw the prompt, the response rate is lower if they were asked within the past day, but is stable after a day
+
+
+from cost_utils_libs import plot_response_rate_since_last_impression_per_hour_oneweek
+plot_response_rate_since_last_impression_per_hour_oneweek()
 
 
 # Alternative visualization, showing it at the individual user level. Still doesn’t seem to be changing over time. heatmap of whether the user makes a choice (1) or goes for default randomly chosen difficulty after 10-second timeout (0). 174 users (x-axis) visualized over the first 400 difficulty choice prompts (y-axis). restricted to users who were in the 0.5 ab-test (the prompt is shown 50% of the time, other 50% of the time it goes with most frequently chosen one). users sorted in increasing choice levels. don't see any clear trends over time - users' willingness to answer the experience sampling question seems fairly static
@@ -94,4 +106,13 @@ plot_survey_choice_counts_install_normalized()
 
 from survey_asknext import plot_survey_choice_to_difficulty_choice_counts
 plot_survey_choice_to_difficulty_choice_counts()
+
+
+# Can we predict the motivation levels?
+# 
+# Baseline (always predict nothing) is 45%. Predict their initial choice is 43%. Predict their first ever choice is 50%. If we vary sampling rate, then the more frequently we ask, the more accurate we get . Pretty linear
+
+
+from retention_utils import make_attrition_plot_by_install_for_randomized_difficulty_assignments
+make_attrition_plot_by_install_for_randomized_difficulty_assignments()
 

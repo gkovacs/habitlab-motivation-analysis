@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b32f16c3b29fe6aa42079b141360d501
+# md5: bed96ead0380d7f096cc789191122e5f
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -105,6 +105,102 @@ def get_epoch_to_domain_to_time_spent(install):
 
 
 
+
+import math
+
+def make_domain_to_daily_time_dataframe():
+  output = []
+  for condition,installs in condition_to_installs.items():
+    condition_to_lengths[condition] = []
+    for install in installs:
+      for epoch,domain_to_time_spent in get_epoch_to_domain_to_time_spent(install).items():
+        total_time_spent = sum(domain_to_time_spent.values())
+        output.append({
+          'user': install,
+          'epoch': epoch,
+          'time': total_time_spent,
+          'logtime': math.log(total_time_spent),
+          'condition': condition,
+        })
+#         for domain,total_time_spent in  domain_to_time_spent.items():
+#           output.append({
+#             'domain': domain,
+#             'user': install,
+#             'epoch': epoch,
+#             'time': total_time_spent,
+#             'logtime': math.log(total_time_spent),
+#             'condition': condition,
+#           })
+  return to_dataframe(output)
+
+
+
+df = make_domain_to_daily_time_dataframe()
+
+
+
+#print(df)
+
+
+
+get_ipython().run_line_magic('Rpush', 'df')
+
+
+
+get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(lmerTest)\n#library(stargazer)')
+
+
+
+# %%R
+
+# df$user <- as.factor(df$user)
+# #df$domain <- as.factor(df$domain)
+# df$condition <- as.factor(df$condition)
+# df$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard"))
+# df$epoch <- as.factor(df$epoch)
+# df$logtime <- as.numeric(df$logtime)
+# df$time <- as.numeric(df$time)
+# summary(df)
+
+
+
+get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\n#df$domain <- as.factor(df$domain)\ndf$condition <- as.factor(df$condition)\ndf$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard"))\ndf$epoch <- as.factor(df$epoch)\ndf$logtime <- as.numeric(df$logtime)\ndf$time <- as.numeric(df$time)\nsummary(df)\n\n\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\n#show(results)\n#show(summary(results))\n#class(results) <- "lmerMod"\n#stargazer(results)')
+
+
+
+
+
+
+
+
+
+
+
+
+from plot_utils import *
+
+def plot_bar(label_with_value_list, **kwargs):
+  print('plot_bar')
+  labels = [x for x,y in label_with_value_list]
+  remap_labels = kwargs.get('remap_labels')
+  if remap_labels is not None:
+    print(remap_labels)
+    labels = [remap_labels.get(x, x) for x in labels]
+  print('labels are')
+  print(labels)
+  data = [go.Bar(x=labels, y=[y for x,y in label_with_value_list])]
+  plot_data(data, **kwargs)
+
+def plot_dict_as_bar(d, **kwargs):
+  data = []
+  items = list(d.items())
+  items.sort(key=lambda x: x[1], reverse=True)
+  plot_bar(items, **kwargs)
+
+
+
+#from plot_utils import *
+plot_dict_as_bar(condition_to_mlengths, title='Total minutes spent daily on sites', xlabel='Difficulty', ylabel='Minutes spent daily on sites', remap_labels={'survey_nochoice_nothing': 'Nothing', 'survey_nochoice_easy': 'Easy', 'survey_nochoice_medium': 'Medium', 'survey_nochoice_hard': 'Hard'})
 
 
 
