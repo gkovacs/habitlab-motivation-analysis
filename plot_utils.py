@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 3652bf95530fbf560cd0b9030a8d3523
+# md5: 7fd30afaf74852e55231ebd8ca81715b
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -41,11 +41,11 @@ def plot_several_points(points_list, **kwargs):
   plot_data(data, **kwargs)
 
 def plot_bar(label_with_value_list, **kwargs):
-  labels = [y for x,y in label_with_value_list]
+  labels = [x for x,y in label_with_value_list]
   remap_labels = kwargs.get('remap_labels')
   if remap_labels is not None:
     labels = [remap_labels.get(x, x) for x in labels]
-  data = [go.Bar(x=[x for x,y in label_with_value_list], y=labels)]
+  data = [go.Bar(x=labels, y=[y for x,y in label_with_value_list])]
   plot_data(data, **kwargs)
 
 def plot_dict_as_bar(d, **kwargs):
@@ -78,6 +78,9 @@ def plot_heatmap(heatmap_data, **kwargs):
       tickmode = 'array',
       tickvals = list(range(len(ticktext))),
       ticktext = ticktext,
+      #tick0 = 0,
+      #dtick = 1,
+      #autotick = False,
     )
   data = [ heatmap ]
   plot_data(data, **kwargs)
@@ -98,11 +101,50 @@ def plot_dictdict_as_bar(d_dict, **kwargs):
 
 
 # plot_heatmap(
+#   [[0,1],[1,1]],
+#   ticktext=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
+#   title='Plot title',
+#   xlabel='x label',
+#   ylabel='y label',
+#   #colorscale = 'Greys',
+#   colorscale = [
+#     [0.0, 'rgb(0, 0, 0)'],
+#     [0.5, 'rgb(0, 0, 0)'],
+#     [0.5, 'rgb(255, 255, 255)'],
+#     [1.0, 'rgb(255, 255, 255)'],
+#   ],
+# )
+
+
+
+# plot_heatmap(
 #   [[3,5],[6,7]],
 #   ticktext=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'],
 #   title='Plot title',
 #   xlabel='x label',
 #   ylabel='y label',
+#   colorscale= [
+#         [0, 'rgb(0, 0, 0)'],
+#         [0.1, 'rgb(0, 0, 0)'],
+#         [0.1, 'rgb(20, 20, 20)'],
+#         [0.2, 'rgb(20, 20, 20)'],
+#         [0.2, 'rgb(40, 40, 40)'],
+#         [0.3, 'rgb(40, 40, 40)'],
+#         [0.3, 'rgb(60, 60, 60)'],
+#         [0.4, 'rgb(60, 60, 60)'],
+#         [0.4, 'rgb(80, 80, 80)'],
+#         [0.5, 'rgb(80, 80, 80)'],
+#         [0.5, 'rgb(100, 100, 100)'],
+#         [0.6, 'rgb(100, 100, 100)'],
+#         [0.6, 'rgb(120, 120, 120)'],
+#         [0.7, 'rgb(120, 120, 120)'],
+#         [0.7, 'rgb(140, 140, 140)'],
+#         [0.8, 'rgb(140, 140, 140)'],
+#         [0.8, 'rgb(160, 160, 160)'],
+#         [0.9, 'rgb(160, 160, 160)'],
+#         [0.9, 'rgb(180, 180, 180)'],
+#         [1.0, 'rgb(180, 180, 180)'],
+#     ],
 # )
 
 
