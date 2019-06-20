@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 8b2eceac7045d1ec92fa5171e8a60b7a
+# md5: f16991c5f3d830792249c9685adeeef4
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -136,6 +136,7 @@ plot_every = 1
 all_losses = []
 
 for sample_difficulty_every_n_visits in range(1, 1001):
+  epoch = 1
   outfile = 'model_attention_nohistory_fulldata_nhidden512_sample_difficulty_every_n_visits_' + str(sample_difficulty_every_n_visits) + '_v10_epoch' + str(epoch) + '.pt'
   if os.path.exists(outfile):
     continue
@@ -147,7 +148,6 @@ for sample_difficulty_every_n_visits in range(1, 1001):
     'sample_difficulty_every_n_visits': sample_difficulty_every_n_visits,
   })
   model = SelfAttentionLSTM({'word_embed_size': num_features, 'window_embed_size': 128})
-  epoch = 1
   all_training_items = iterateTrainingData(training_data)
   print('sample_difficulty_every_n_visits', sample_difficulty_every_n_visits)
   current_loss = 0

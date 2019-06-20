@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b698673ab87058add1a31689b1544149
+# md5: 45b565985dafbcb8a1b435a905c5a462
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -397,6 +397,7 @@ def make_attrition_plot_by_install_for_randomized_difficulty_assignments():
 
 
 
+
 # def get_users_with_experiment_vars():
 #   collection_names = get_collection_names()
 #   output = []
@@ -455,15 +456,16 @@ def make_attrition_plot_by_install_for_randomized_difficulty_assignments():
 
 
 
-# def main():
-#   conditions_set = set()
-#   for install in get_installs_with_choose_difficulty():
-#     all_conditions = get_abtest_experiment_conditions_for_install(install)
-#     options_tested = all_conditions.get('difficulty_selection_screen')
-#     if type(options_tested) == list:
-#       options_tested = tuple(options_tested)
-#     conditions_set.add(options_tested)
-#   return conditions_set
+def main():
+  conditions_set = set()
+  for install in get_installs_with_choose_difficulty():
+    all_conditions = get_abtest_experiment_conditions_for_install(install)
+    #options_tested = all_conditions.get('difficulty_selection_screen')
+    options_tested = all_conditions.get('frequency_of_choose_difficulty')
+    if type(options_tested) == list:
+      options_tested = tuple(options_tested)
+    conditions_set.add(options_tested)
+  return conditions_set
 
-# #print(main())
+print(main())
 
