@@ -1,0 +1,10 @@
+#!/bin/bash
+
+while true; do
+echo 'copying to asus'
+sleep 30
+rsync -avzx ./tm_* asus:/home/geza/motivation/
+echo 'copying from asus'
+sleep 30
+rsync -avzx asus:/home/geza/motivation/tm_* ./
+done

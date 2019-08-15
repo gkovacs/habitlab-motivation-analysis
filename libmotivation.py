@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 61fa609bb026522bdaf8e66226feda9d
+# md5: c139704d80a530a914150967bb149da3
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -244,7 +244,8 @@ def get_breakdown_for_one_tried():
 
 def get_conditions_to_install_list_in_abtest(abtest_name, abtest_conditions):
   output = {}
-  for install in get_installs_with_choose_difficulty():
+  #for install in get_installs_with_choose_difficulty():
+  for install in get_installs_with_experiment_vars():
     abtest_settings = get_abtest_settings_for_install(install)
     if abtest_name not in abtest_settings:
       continue
@@ -266,7 +267,8 @@ def get_conditions_to_install_list_in_abtest(abtest_name, abtest_conditions):
 
 def get_conditions_to_user_list_in_abtest(abtest_name, abtest_conditions):
   output = {}
-  for user in get_users_with_choose_difficulty():
+  #for user in get_users_with_choose_difficulty():
+  for user in get_users_with_experiment_vars():
     abtest_settings = get_abtest_settings(user)
     if abtest_name not in abtest_settings:
       continue

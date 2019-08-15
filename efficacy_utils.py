@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: bed96ead0380d7f096cc789191122e5f
+# md5: a5413ff0336dbb76ebbb1038173b2e88
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -36,6 +36,15 @@ def get_condition_to_installs_for_random_assignment_abtest():
 
 
 
+
+def get_condition_to_installs_for_random_assignment_abtest():
+  abtest_name = 'difficulty_selection_screen'
+  groups = ['survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard']
+  condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
+  for k in list(condition_to_installs.keys()):
+    if k not in groups:
+      del condition_to_installs[k]
+  return condition_to_installs
 
 
 
@@ -106,12 +115,16 @@ def get_epoch_to_domain_to_time_spent(install):
 
 
 
+
+
+
+
 import math
 
 def make_domain_to_daily_time_dataframe():
   output = []
   for condition,installs in condition_to_installs.items():
-    condition_to_lengths[condition] = []
+    #condition_to_lengths[condition] = []
     for install in installs:
       for epoch,domain_to_time_spent in get_epoch_to_domain_to_time_spent(install).items():
         total_time_spent = sum(domain_to_time_spent.values())
@@ -178,24 +191,6 @@ get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\n#df$doma
 
 
 from plot_utils import *
-
-def plot_bar(label_with_value_list, **kwargs):
-  print('plot_bar')
-  labels = [x for x,y in label_with_value_list]
-  remap_labels = kwargs.get('remap_labels')
-  if remap_labels is not None:
-    print(remap_labels)
-    labels = [remap_labels.get(x, x) for x in labels]
-  print('labels are')
-  print(labels)
-  data = [go.Bar(x=labels, y=[y for x,y in label_with_value_list])]
-  plot_data(data, **kwargs)
-
-def plot_dict_as_bar(d, **kwargs):
-  data = []
-  items = list(d.items())
-  items.sort(key=lambda x: x[1], reverse=True)
-  plot_bar(items, **kwargs)
 
 
 

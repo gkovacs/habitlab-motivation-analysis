@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 45b565985dafbcb8a1b435a905c5a462
+# md5: e3cc4a9037df7785db5acf0845a57418
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -214,6 +214,7 @@ def get_retention_info_for_groups_to_installs(group_to_installs, category_name):
       output.append({
         'lifetime': retention_info['lifetime'],
         'attritioned': retention_info['attritioned'],
+        'install': install,
         category_name: group,
       }) 
   return to_dataframe(output)
@@ -232,7 +233,7 @@ def get_retention_info_for_groups_to_users(group_to_users, category_name):
         'lifetime': retention_info['lifetime'],
         'attritioned': retention_info['attritioned'],
         category_name: group,
-      }) 
+      })
   return to_dataframe(output)
 
 
@@ -394,6 +395,44 @@ def make_attrition_plot_by_install_for_randomized_difficulty_assignments():
 
 
 
+get_ipython().run_cell_magic('javascript', '', 'IPython.OutputArea.prototype._should_scroll = function(lines) {\n    return false;\n}')
+
+
+
+
+
+
+
+def get_all_install_info_for_install_id(install_id):
+  install_info_list = get_collection_items('installs')
+  output = []
+  for install_info in install_info_list:
+    cur_install_id = install_info.get('install_id', None)
+    if cur_install_id == install_id:
+      output.append(install_info)
+  return output
+
+
+
+def get_all_install_info_for_user(user):
+  install_info_list = get_collection_items('installs')
+  output = []
+  for install_info in install_info_list:
+    cur_user_id = install_info.get('user_id', None)
+    if cur_user_id == user:
+      output.append(install_info)
+  return output
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -455,17 +494,4 @@ def make_attrition_plot_by_install_for_randomized_difficulty_assignments():
 #  print(k, len(v))
 
 
-
-def main():
-  conditions_set = set()
-  for install in get_installs_with_choose_difficulty():
-    all_conditions = get_abtest_experiment_conditions_for_install(install)
-    #options_tested = all_conditions.get('difficulty_selection_screen')
-    options_tested = all_conditions.get('frequency_of_choose_difficulty')
-    if type(options_tested) == list:
-      options_tested = tuple(options_tested)
-    conditions_set.add(options_tested)
-  return conditions_set
-
-print(main())
 
