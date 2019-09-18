@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: a5413ff0336dbb76ebbb1038173b2e88
+# md5: ca5f58d5dfe72a33a1b4e0161d7ed5c6
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -38,8 +38,8 @@ def get_condition_to_installs_for_random_assignment_abtest():
 
 
 def get_condition_to_installs_for_random_assignment_abtest():
-  abtest_name = 'difficulty_selection_screen'
-  groups = ['survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard']
+  abtest_name = 'difficulty_selection_screen_and_choose_difficulty_frequency'
+  groups = ['survey', 'nodefault_forcedchoice_userchoice', 'survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard']
   condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
   for k in list(condition_to_installs.keys()):
     if k not in groups:
@@ -195,7 +195,7 @@ from plot_utils import *
 
 
 #from plot_utils import *
-plot_dict_as_bar(condition_to_mlengths, title='Total minutes spent daily on sites', xlabel='Difficulty', ylabel='Minutes spent daily on sites', remap_labels={'survey_nochoice_nothing': 'Nothing', 'survey_nochoice_easy': 'Easy', 'survey_nochoice_medium': 'Medium', 'survey_nochoice_hard': 'Hard'})
+plot_dict_as_bar(condition_to_mlengths, title='Total minutes spent daily on sites', xlabel='Difficulty', ylabel='Minutes spent daily on sites', remap_labels={'survey_nochoice_nothing': 'Nothing', 'survey_nochoice_easy': 'Easy', 'survey_nochoice_medium': 'Medium', 'survey_nochoice_hard': 'Hard', 'survey': 'Experience Sampling', 'nodefault_forcedchoice_userchoice': 'Onboarding Choice'})
 
 
 
