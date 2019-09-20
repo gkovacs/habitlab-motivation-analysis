@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 8b44f7a10f8616067f51f4d395cde961
+# md5: f97c0db60f0044a8a64b16cb0fbfd25a
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -70,7 +70,9 @@ def plot_initial_chosen_difficulties_per_install_percent():
     chosen_difficulties,
     title = 'Initial difficulty chosen during onboarding',
     xlabel = 'Difficulty level',
-    ylabel = 'Fraction of users',
+    ylabel = 'Percent of users',
+    remap_labels = {'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard', 'nothing': 'Nothing'},
+    font=dict(size=20),
   )
 
 

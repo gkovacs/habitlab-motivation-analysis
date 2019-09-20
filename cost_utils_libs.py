@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 13b06bb55850819f6565502071470633
+# md5: 92627a267d1cd8f65607e6b4e531cf9a
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -796,11 +796,15 @@ def plot_latency_for_all_users_nonrandom():
   data = [go.Histogram(x=latency_list_all)]
   plot_data(
     data,
-    xlabel = 'Seconds elapsed until user chooses a difficulty (only including sessions where the user made a choice)',
+    #xlabel = 'Seconds elapsed until user chooses a difficulty (only including sessions where the user made a choice)',
+    xlabel = 'Seconds elapsed until user chooses a difficulty',
     ylabel = 'Number of sessions',
     title = 'Time needed for users to choose intervention difficulty each session',
+    font=dict(size=18),
   )
   #iplot(data)
+
+
 
 
 

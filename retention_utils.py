@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: ec25945bb968f0327ad2b857e2f10e33
+# md5: 1b0b754046cd6d40eba1601a48c13201
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -210,6 +210,8 @@ def get_retention_info_for_groups_to_installs(group_to_installs, category_name):
     for install in install_list:
       if get_is_install_unofficial(install):
         continue
+      if install not in install_to_retention_info:
+        continue
       retention_info = install_to_retention_info[install]
       output.append({
         'lifetime': retention_info['lifetime'],
@@ -314,8 +316,11 @@ def plot_attrition(pandas_df, varname):
   summary(fit)
   ggsurvplot(fit,
     pval = TRUE, conf.int = TRUE,
-    risk.table = TRUE, # Add risk table
+    risk.table = "percentage", # Add risk table
+    xlab = "Time in days",
+    #risk.table = TRUE, # Add risk table
     risk.table.col = "strata", # Change risk table color by groups
+    risk.table.y.text = FALSE,
     linetype = "strata", # Change line type by groups
     surv.median.line = "hv", # Specify median survival
     ggtheme = theme_bw(), # Change ggplot2 theme
@@ -400,6 +405,45 @@ get_ipython().run_cell_magic('javascript', '', 'IPython.OutputArea.prototype._sh
 
 
 
+retention_info = retention_info.rename(columns={"difficulty_selection_screen_and_choose_difficulty_frequency": "Condition"})
+
+
+
+set(list(retention_info['Condition'])) #= map(lambda x: {'survey': 'Survey', }[x])
+
+
+
+retention_info['Condition'] = retention_info['Condition'].replace(
+  'nodefault_forcedchoice_userchoice', 'Initial User Choice'
+).replace(
+  'survey', 'Continuous User Choice'
+).replace(
+  'survey_nochoice_easy', 'Easy'
+).replace(
+  'survey_nochoice_medium', 'Medium'
+).replace(
+  'survey_nochoice_hard', 'Hard'
+).replace(
+  'survey_nochoice_nothing', 'Nothing'
+)
+
+
+
+print(len(list(retention_info['lifetime'])))
+print(np.max(list(retention_info['lifetime'])))
+print(np.mean(list(retention_info['lifetime'])))
+print(np.median(list(retention_info['lifetime'])))
+print(np.std(list(retention_info['lifetime'])))
+print(np.sum(list(retention_info['lifetime'])))
+
+#retention_info
+
+
+
+plot_attrition(retention_info, 'Condition')
+
+
+
 
 
 
@@ -433,6 +477,40 @@ def get_all_install_info_for_user(user):
 
 
 
+
+
+retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
+
+#print(retention_info[retention_info['lifetime'] > 0])
+
+
+
+
+retention_info = retention_info.rename(columns={"frequency_of_choose_difficulty": "Experience_Sampling_Frequency"})
+
+
+
+set(list(retention_info['Experience_Sampling_Frequency'])) #= map(lambda x: {'survey': 'Survey', }[x])
+
+
+
+retention_info['Experience_Sampling_Frequency'] = retention_info['Experience_Sampling_Frequency'].replace(
+  '0.0', 'No Experience Sampling'
+).replace(
+  '0.25', '25% of visits'
+).replace(
+  '0.50', '50% of visits'
+).replace(
+  '1.0', '100% of visits'
+)
+
+
+
+max(list(retention_info['lifetime']))
+
+
+
+len(set(list(retention_info['install']))
 
 
 
