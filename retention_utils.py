@@ -1,10 +1,16 @@
 #!/usr/bin/env python
-# md5: 1b0b754046cd6d40eba1601a48c13201
+# md5: 9acdd3be2dbb2f33bfef58d000305e86
 #!/usr/bin/env python
 # coding: utf-8
 
 
 
+#%reload_ext rpy2.ipython
+
+
+
+#import r_utils
+#reload(r_utils)
 from r_utils import r, r_assign
 
 
@@ -304,6 +310,10 @@ def get_retention_info_by_frequency_of_choose_difficulty_by_user():
 
 
 
+import r_utils
+reload(r_utils)
+from r_utils import r, r_assign
+
 def plot_attrition(pandas_df, varname):
   r_assign('plot_attrition_df', pandas_df)
   r(f"""
@@ -314,7 +324,7 @@ def plot_attrition(pandas_df, varname):
   library("survminer")
   fit <- survfit(Surv(lifetime, attritioned) ~ {varname}, data=plot_attrition_df)
   summary(fit)
-  ggsurvplot(fit,
+  ggsurv <- ggsurvplot(fit,
     pval = TRUE, conf.int = TRUE,
     risk.table = "percentage", # Add risk table
     xlab = "Time in days",
@@ -324,7 +334,15 @@ def plot_attrition(pandas_df, varname):
     linetype = "strata", # Change line type by groups
     surv.median.line = "hv", # Specify median survival
     ggtheme = theme_bw(), # Change ggplot2 theme
+    tables.theme = clean_theme(),
+    #font.x = 40, #c(80, "bold"),
+    #font.y = 40, #c(80, "bold"),
+    #risk.table.fontsize = 40,
+    #pval.size = 60,
   )
+  #ggsurv$plot <- ggsurv$plot + theme(legend.text = element_text(size = 60, color = "black"))
+  #ggsurv$plot <- ggsurv$plot + theme(legend.text = element_text(size = 80, color = "black", face = "bold"))
+  ggsurv
   """)
 #   r(f"""
 #   plot_attrition_df$lifetime <- as.numeric(plot_attrition_df$lifetime)
@@ -339,6 +357,33 @@ def plot_attrition(pandas_df, varname):
 #   }}
 #   """)
 #   %R -w 1000 print(plot_attrition_func())
+
+
+def plot_attrition_save(pandas_df, varname, savename):
+  r_assign('plot_attrition_df', pandas_df)
+  r(f"""
+  plot_attrition_df$lifetime <- as.numeric(plot_attrition_df$lifetime)
+  plot_attrition_df$attritioned <- as.logical(plot_attrition_df$attritioned)
+  plot_attrition_df${varname} <- as.factor(plot_attrition_df${varname})
+  library("survival")
+  library("survminer")
+  fit <- survfit(Surv(lifetime, attritioned) ~ {varname}, data=plot_attrition_df)
+  summary(fit)
+  pp <- ggsurvplot(fit,
+    pval = TRUE, conf.int = TRUE,
+    risk.table = "percentage", # Add risk table
+    xlab = "Time in days",
+    #risk.table = TRUE, # Add risk table
+    risk.table.col = "strata", # Change risk table color by groups
+    risk.table.y.text = FALSE,
+    linetype = "strata", # Change line type by groups
+    surv.median.line = "hv", # Specify median survival
+    ggtheme = theme_bw(), # Change ggplot2 theme
+    tables.theme = clean_theme(),
+
+  )
+  ggsave("{savename}.png", plot=print(pp), dpi = 300)
+  """)
 
 
 
@@ -441,6 +486,7 @@ print(np.sum(list(retention_info['lifetime'])))
 
 
 plot_attrition(retention_info, 'Condition')
+plot_attrition_save(retention_info, 'Choice_Frequency', 'nochoice_retention')
 
 
 
@@ -499,7 +545,7 @@ retention_info['Experience_Sampling_Frequency'] = retention_info['Experience_Sam
 ).replace(
   '0.25', '25% of visits'
 ).replace(
-  '0.50', '50% of visits'
+  '0.5', '50% of visits'
 ).replace(
   '1.0', '100% of visits'
 )
@@ -510,7 +556,81 @@ max(list(retention_info['lifetime']))
 
 
 
-len(set(list(retention_info['install']))
+#len(set(list(retention_info['install']))
+
+
+
+condition_to_installs = get_conditions_to_install_list_in_abtest('frequency_of_choose_difficulty', ['1.0', 'nextvisit', 'day', 'survey'])
+retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
+plot_attrition(retention_info, 'frequency_of_choose_difficulty')
+#plot_attrition_for_abtest_groups_by_install('frequency_of_choose_difficulty', ['1.0', 'nextvisit', 'day', 'survey'])
+
+
+
+condition_to_installs['1.0'].remove('ab3965ad71bf9b625e270489')
+condition_to_installs['survey'].remove('7d2d5aedfa833074112ded04')
+
+
+
+#del condition_to_installs['survey']
+
+
+
+#print(condition_to_installs)
+
+
+
+#set(list(retention_info['Experience_Sampling_Frequency'])) #= map(lambda x: {'survey': 'Survey', }[x])
+
+
+
+retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
+retention_info = retention_info.rename(columns={"frequency_of_choose_difficulty": "Choice_Frequency"})
+
+
+
+retention_info['Choice_Frequency'] = retention_info['Choice_Frequency'].replace(
+  '1.0', 'Every Visit, Optional Choice' # if don't answer then random 
+).replace(
+  'day', 'Once Per Day, Forced Choice'
+).replace(
+  'nextvisit', 'Every Visit, Forced Choice'
+).replace(
+  'survey', 'Choose Frequency'
+)
+
+
+
+
+
+
+
+# ADD TO SUPPLEMENT
+
+plot_attrition(retention_info, 'Choice_Frequency')
+plot_attrition_save(retention_info, 'Choice_Frequency', 'experience_sampling_frequency')
+
+
+
+len(set(list(retention_info['install'])))
+
+
+
+max(list(retention_info['lifetime']))
+
+
+
+#plot_attrition_for_abtest_groups_by_install('frequency_of_choose_difficulty', ['0.0', 'survey'])
+#condition_to_installs = get_conditions_to_install_list_in_abtest('frequency_of_choose_difficulty', ['0.0', 'survey'])
+#print(condition_to_installs)
+
+
+
+
+
+
+
+print(retention_info[retention_info['lifetime'] > 120])
 
 
 
