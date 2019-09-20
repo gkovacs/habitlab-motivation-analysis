@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 7fd30afaf74852e55231ebd8ca81715b
+# md5: b4f6ebe8e1b1f5646810657c8b7a51d0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -15,6 +15,7 @@ def plot_data(data, **kwargs):
   title = kwargs.get('title')
   xlabel = kwargs.get('xlabel')
   ylabel = kwargs.get('ylabel')
+  font = kwargs.get('font')
   
   layout = go.Layout()
   if title is not None:
@@ -23,6 +24,8 @@ def plot_data(data, **kwargs):
     layout.xaxis = go.layout.XAxis(title = xlabel)
   if ylabel is not None:
     layout.yaxis = go.layout.YAxis(title = ylabel)
+  if font is not None:
+    layout.font = font
   fig = go.Figure(data=data, layout=layout)
   iplot(fig)
 
@@ -55,6 +58,16 @@ def plot_dict_as_bar(d, **kwargs):
   plot_bar(items, **kwargs)
 
 def plot_dict_as_bar_percent(d, **kwargs):
+  data = []
+  nd = {}
+  val_sum = sum(d.values())
+  for k,v in d.items():
+    nd[k] = 100 * v / val_sum
+  items = list(nd.items())
+  items.sort(key=lambda x: x[1], reverse=True)
+  plot_bar(items, **kwargs)
+
+def plot_dict_as_bar_fraction(d, **kwargs):
   data = []
   nd = {}
   val_sum = sum(d.values())

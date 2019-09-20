@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: e4f3d7187c478c48ca55059ba24e6681
+# md5: 38d422182111b9fd5b828f45d7fa779e
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -140,7 +140,7 @@ def plot_difficulty_choices_heatmap():
   plot_heatmap(
     heatmap_data,
     title = 'Changes in user difficulty choices over time',
-    xlabel = 'How manyth time the user is choosing difficulty',
+    xlabel = 'i-th time the user is choosing difficulty',
     ylabel = 'User index',
     #colorscale = 'Greys',
     # 67, 7, 83. 52, 105, 139. 61, 182, 122. 252, 229, 64

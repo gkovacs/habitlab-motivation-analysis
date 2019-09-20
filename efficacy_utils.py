@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: ca5f58d5dfe72a33a1b4e0161d7ed5c6
+# md5: 9e8b4a1bf7d942b5e04637cd3ebb5be0
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -40,7 +40,8 @@ def get_condition_to_installs_for_random_assignment_abtest():
 def get_condition_to_installs_for_random_assignment_abtest():
   abtest_name = 'difficulty_selection_screen_and_choose_difficulty_frequency'
   groups = ['survey', 'nodefault_forcedchoice_userchoice', 'survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard']
-  condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
+  #condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
+  condition_to_installs = get_conditions_to_install_list_in_abtest(abtest_name)
   for k in list(condition_to_installs.keys()):
     if k not in groups:
       del condition_to_installs[k]
@@ -127,23 +128,23 @@ def make_domain_to_daily_time_dataframe():
     #condition_to_lengths[condition] = []
     for install in installs:
       for epoch,domain_to_time_spent in get_epoch_to_domain_to_time_spent(install).items():
-        total_time_spent = sum(domain_to_time_spent.values())
-        output.append({
-          'user': install,
-          'epoch': epoch,
-          'time': total_time_spent,
-          'logtime': math.log(total_time_spent),
-          'condition': condition,
-        })
-#         for domain,total_time_spent in  domain_to_time_spent.items():
-#           output.append({
-#             'domain': domain,
-#             'user': install,
-#             'epoch': epoch,
-#             'time': total_time_spent,
-#             'logtime': math.log(total_time_spent),
-#             'condition': condition,
-#           })
+#         total_time_spent = sum(domain_to_time_spent.values())
+#         output.append({
+#           'user': install,
+#           'epoch': epoch,
+#           'time': total_time_spent,
+#           'logtime': math.log(total_time_spent),
+#           'condition': condition,
+#         })
+        for domain,total_time_spent in  domain_to_time_spent.items():
+          output.append({
+            'domain': domain,
+            'user': install,
+            'epoch': epoch,
+            'time': total_time_spent,
+            'logtime': math.log(total_time_spent),
+            'condition': condition,
+          })
   return to_dataframe(output)
 
 
@@ -160,7 +161,12 @@ get_ipython().run_line_magic('Rpush', 'df')
 
 
 
-get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(lmerTest)\n#library(stargazer)')
+#%%R
+#install.library
+
+
+
+get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(lmerTest)\nlibrary(stargazer)')
 
 
 
@@ -177,11 +183,15 @@ get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(
 
 
 
-get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\n#df$domain <- as.factor(df$domain)\ndf$condition <- as.factor(df$condition)\ndf$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard"))\ndf$epoch <- as.factor(df$epoch)\ndf$logtime <- as.numeric(df$logtime)\ndf$time <- as.numeric(df$time)\nsummary(df)\n\n\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\n#show(results)\n#show(summary(results))\n#class(results) <- "lmerMod"\n#stargazer(results)')
+get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\ndf$domain <- as.factor(df$domain)\ndf$condition <- as.factor(df$condition)\ndf$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard", "survey", "nodefault_forcedchoice_userchoice"))\ndf$epoch <- as.factor(df$epoch)\ndf$logtime <- as.numeric(df$logtime)\ndf$time <- as.numeric(df$time)\nsummary(df)\n\n')
 
 
 
+get_ipython().run_cell_magic('R', '', "\ndfsub <- df[df$domain == 'www.youtube.com', ]\nshow(summary(dfsub))\n#show(summary(subset(df, domain='www.youtube.com')))\n#dfsub <- subset(df, domain='www.youtube.com')\n#show(summary(dfsub))")
 
+
+
+get_ipython().run_cell_magic('R', '', '\ndfsub <- df[df$domain == \'www.facebook.com\', ]\nshow(summary(dfsub))\n#results <- lmer(logtime ~ condition + (1|user), data = df)\nresults <- lmer(logtime ~ condition + (1|user), data = dfsub)\n#results <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\nshow(results)\nshow(summary(results))\nclass(results) <- "lmerMod"\nstargazer(results)')
 
 
 
