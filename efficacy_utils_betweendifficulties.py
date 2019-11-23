@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 931e4d0dfe28a4304a555b2da19edd24
+# md5: 3a107cc179d1966421dc078d1e47f022
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -37,14 +37,14 @@ def get_condition_to_installs_for_random_assignment_abtest():
 
 
 
-def get_condition_to_installs_for_random_assignment_abtest():
-  abtest_name = 'difficulty_selection_screen_and_choose_difficulty_frequency'
-  groups = ['survey', 'nodefault_forcedchoice_userchoice', 'survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard']
-  condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
-  for k in list(condition_to_installs.keys()):
-    if k not in groups:
-      del condition_to_installs[k]
-  return condition_to_installs
+# def get_condition_to_installs_for_random_assignment_abtest():
+#   abtest_name = 'difficulty_selection_screen_and_choose_difficulty_frequency'
+#   groups = ['survey', 'nodefault_forcedchoice_userchoice', 'survey_nochoice_nothing', 'survey_nochoice_easy', 'survey_nochoice_medium', 'survey_nochoice_hard']
+#   condition_to_installs = get_conditions_to_install_list_in_abtest_unstrict(abtest_name)
+#   for k in list(condition_to_installs.keys()):
+#     if k not in groups:
+#       del condition_to_installs[k]
+#   return condition_to_installs
 
 
 
@@ -148,24 +148,15 @@ def make_domain_to_daily_time_dataframe():
 
 
 
-df = make_domain_to_daily_time_dataframe()
-
-
 
 #print(df)
 
-
-
-get_ipython().run_line_magic('Rpush', 'df')
 
 
 
 #%%R
 #install.library
 
-
-
-get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(lmerTest)\nlibrary(stargazer)')
 
 
 
@@ -182,25 +173,12 @@ get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(
 
 
 
-get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\ndf$domain <- as.factor(df$domain)\ndf$condition <- as.factor(df$condition)\ndf$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard", "survey", "nodefault_forcedchoice_userchoice"))\ndf$epoch <- as.factor(df$epoch)\ndf$logtime <- as.numeric(df$logtime)\ndf$time <- as.numeric(df$time)\nsummary(df)\n\n')
-
-
-
-get_ipython().run_cell_magic('R', '', '\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user), data = df)\nresults <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\nshow(results)\nshow(summary(results))\nclass(results) <- "lmerMod"\nstargazer(results)')
 
 
 
 
 
 
-
-
-from plot_utils import *
-
-
-
-#from plot_utils import *
-plot_dict_as_bar(condition_to_mlengths, title='Total minutes spent daily on sites', xlabel='Difficulty', ylabel='Minutes spent daily on sites', remap_labels={'survey_nochoice_nothing': 'Nothing', 'survey_nochoice_easy': 'Easy', 'survey_nochoice_medium': 'Medium', 'survey_nochoice_hard': 'Hard', 'survey': 'Experience Sampling', 'nodefault_forcedchoice_userchoice': 'Onboarding Choice'})
 
 
 

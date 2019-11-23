@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 9acdd3be2dbb2f33bfef58d000305e86
+# md5: 6aeaad934483f04c8484147d11958bf4
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -450,43 +450,11 @@ get_ipython().run_cell_magic('javascript', '', 'IPython.OutputArea.prototype._sh
 
 
 
-retention_info = retention_info.rename(columns={"difficulty_selection_screen_and_choose_difficulty_frequency": "Condition"})
 
 
 
-set(list(retention_info['Condition'])) #= map(lambda x: {'survey': 'Survey', }[x])
 
 
-
-retention_info['Condition'] = retention_info['Condition'].replace(
-  'nodefault_forcedchoice_userchoice', 'Initial User Choice'
-).replace(
-  'survey', 'Continuous User Choice'
-).replace(
-  'survey_nochoice_easy', 'Easy'
-).replace(
-  'survey_nochoice_medium', 'Medium'
-).replace(
-  'survey_nochoice_hard', 'Hard'
-).replace(
-  'survey_nochoice_nothing', 'Nothing'
-)
-
-
-
-print(len(list(retention_info['lifetime'])))
-print(np.max(list(retention_info['lifetime'])))
-print(np.mean(list(retention_info['lifetime'])))
-print(np.median(list(retention_info['lifetime'])))
-print(np.std(list(retention_info['lifetime'])))
-print(np.sum(list(retention_info['lifetime'])))
-
-#retention_info
-
-
-
-plot_attrition(retention_info, 'Condition')
-plot_attrition_save(retention_info, 'Choice_Frequency', 'nochoice_retention')
 
 
 
@@ -525,50 +493,22 @@ def get_all_install_info_for_user(user):
 
 
 
-retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
-
-#print(retention_info[retention_info['lifetime'] > 0])
 
 
 
 
-retention_info = retention_info.rename(columns={"frequency_of_choose_difficulty": "Experience_Sampling_Frequency"})
 
 
 
-set(list(retention_info['Experience_Sampling_Frequency'])) #= map(lambda x: {'survey': 'Survey', }[x])
+#plot_attrition_df
 
 
-
-retention_info['Experience_Sampling_Frequency'] = retention_info['Experience_Sampling_Frequency'].replace(
-  '0.0', 'No Experience Sampling'
-).replace(
-  '0.25', '25% of visits'
-).replace(
-  '0.5', '50% of visits'
-).replace(
-  '1.0', '100% of visits'
-)
-
-
-
-max(list(retention_info['lifetime']))
 
 
 
 #len(set(list(retention_info['install']))
 
 
-
-condition_to_installs = get_conditions_to_install_list_in_abtest('frequency_of_choose_difficulty', ['1.0', 'nextvisit', 'day', 'survey'])
-retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
-plot_attrition(retention_info, 'frequency_of_choose_difficulty')
-#plot_attrition_for_abtest_groups_by_install('frequency_of_choose_difficulty', ['1.0', 'nextvisit', 'day', 'survey'])
-
-
-
-condition_to_installs['1.0'].remove('ab3965ad71bf9b625e270489')
-condition_to_installs['survey'].remove('7d2d5aedfa833074112ded04')
 
 
 
@@ -584,39 +524,12 @@ condition_to_installs['survey'].remove('7d2d5aedfa833074112ded04')
 
 
 
-retention_info = get_retention_info_for_groups_to_installs(condition_to_installs, 'frequency_of_choose_difficulty')
-retention_info = retention_info.rename(columns={"frequency_of_choose_difficulty": "Choice_Frequency"})
-
-
-
-retention_info['Choice_Frequency'] = retention_info['Choice_Frequency'].replace(
-  '1.0', 'Every Visit, Optional Choice' # if don't answer then random 
-).replace(
-  'day', 'Once Per Day, Forced Choice'
-).replace(
-  'nextvisit', 'Every Visit, Forced Choice'
-).replace(
-  'survey', 'Choose Frequency'
-)
 
 
 
 
 
 
-
-# ADD TO SUPPLEMENT
-
-plot_attrition(retention_info, 'Choice_Frequency')
-plot_attrition_save(retention_info, 'Choice_Frequency', 'experience_sampling_frequency')
-
-
-
-len(set(list(retention_info['install'])))
-
-
-
-max(list(retention_info['lifetime']))
 
 
 
@@ -628,9 +541,6 @@ max(list(retention_info['lifetime']))
 
 
 
-
-
-print(retention_info[retention_info['lifetime'] > 120])
 
 
 
