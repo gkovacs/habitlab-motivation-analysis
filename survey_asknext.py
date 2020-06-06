@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 216ab487220ce5fe66854366c8c0668b
+# md5: 86672539992cd8a8ab65b7cadcfd1875
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -94,6 +94,16 @@ def get_users_with_asknext_survey():
 
 
 
+
+# noexpor
+
+
+print(min(day_set))
+print(max(day_set))
+print(max(day_set) - min(day_set))
+
+
+
 def get_survey_choice_to_num_installs_who_choose_it_most_commonly():
   output = Counter()
   for install in get_installs_with_asknext_survey():
@@ -151,6 +161,8 @@ def plot_survey_choice_to_difficulty_choice_counts():
     ylabel = 'Number of times chosen',
     xlabel = 'Intervention difficulty chosen, along with when to ask about difficulty again',
     title = 'Choices for intervention difficulty and when to ask about difficulty again',
+    remap_labels = {'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard', 'nothing': 'No Intervention', 'nextvisit': 'Next Visit', 'hour': 'Next Hour', 'day': 'Next Day', 'week': 'Next Week'},
+    font=dict(size=18),
   )
 
 def plot_survey_choice_counts_raw_per_user():
@@ -182,8 +194,10 @@ def plot_survey_choice_counts_install_normalized():
   plot_dict_as_bar(
     survey_choice_to_num_installs_who_choose_it_most_commonly,
     ylabel = 'Number of users',
-    xlabel = 'User\'s most frequent choice for when to next ask about intervention difficulty',
-    title = 'Most frequent choice for when to ask next about intervention difficulty, by number of users',
+    xlabel = 'Choice for when to next ask about intervention difficulty',
+    title = 'Users\' most frequent choice for sampling frequency',
+    remap_labels = {'nextvisit': 'Next Visit', 'hour': 'Next Hour', 'day': 'Next Day', 'week': 'Next Week'},
+    font=dict(size=22),
   )
 
 def plot_survey_choice_counts_user_normalized():
@@ -201,5 +215,18 @@ def plot_survey_choice_counts_user_normalized():
 
 
 
+total_count = 0
+for survey_choice,difficulty_counts in survey_choice_to_difficulty_choice_counts.items():
+  for difficulty,count in difficulty_counts.items():
+    total_count += count
+print(total_count)
 
+
+
+
+
+
+
+
+# sum(Counter({'nextvisit': 282, 'week': 220, 'day': 74, 'hour': 67}).values())
 

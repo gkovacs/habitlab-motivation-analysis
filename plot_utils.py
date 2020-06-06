@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b4f6ebe8e1b1f5646810657c8b7a51d0
+# md5: c17d3acd334f1ed8f0bf856dd96c176c
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -46,9 +46,13 @@ def plot_several_points(points_list, **kwargs):
 def plot_bar(label_with_value_list, **kwargs):
   labels = [x for x,y in label_with_value_list]
   remap_labels = kwargs.get('remap_labels')
+  orientation = kwargs.get('orientation', 'v')
   if remap_labels is not None:
     labels = [remap_labels.get(x, x) for x in labels]
-  data = [go.Bar(x=labels, y=[y for x,y in label_with_value_list])]
+  if orientation == 'h':
+    data = [go.Bar(y=labels, x=[y for x,y in label_with_value_list], orientation=orientation)]
+  else:
+    data = [go.Bar(x=labels, y=[y for x,y in label_with_value_list], orientation=orientation)]
   plot_data(data, **kwargs)
 
 def plot_dict_as_bar(d, **kwargs):
@@ -100,11 +104,17 @@ def plot_heatmap(heatmap_data, **kwargs):
 
 def plot_dictdict_as_bar(d_dict, **kwargs):
   data = []
+  remap_labels = kwargs.get('remap_labels', {})
+  print(remap_labels)
   for label,d in d_dict.items():
+    label = remap_labels.get(label, label)
+    print(label)
     items = list(d.items())
     items.sort(key=lambda x: x[1], reverse=True)
-    data.append(go.Bar(x=[x for x,y in items], y=[y for x,y in items], name=label))
+    data.append(go.Bar(x=[remap_labels.get(x, x) for x,y in items], y=[y for x,y in items], name=label))
   plot_data(data, **kwargs)
+
+
 
 
 

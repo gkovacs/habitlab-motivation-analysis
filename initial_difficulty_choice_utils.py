@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: f97c0db60f0044a8a64b16cb0fbfd25a
+# md5: 7bb92fc38ab879eed40d97f6ae2e894c
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -42,9 +42,9 @@ def plot_initial_chosen_difficulties_per_install():
     title = 'Initial difficulty chosen during onboarding',
     xlabel = 'Difficulty level',
     ylabel = 'Number of users',
-    remap_labels = {'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard', 'nothing': 'Nothing'},
+    remap_labels = {'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard', 'nothing': 'No Intervention'},
     #font=dict(family='Courier New, monospace', size=18, color='#7f7f7f'),
-    font=dict(size=18),
+    font=dict(size=20),
   )
 
 
@@ -71,8 +71,8 @@ def plot_initial_chosen_difficulties_per_install_percent():
     title = 'Initial difficulty chosen during onboarding',
     xlabel = 'Difficulty level',
     ylabel = 'Percent of users',
-    remap_labels = {'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard', 'nothing': 'Nothing'},
-    font=dict(size=20),
+    remap_labels = {'easy': 'Easy', 'medium': 'Medium', 'hard': 'Hard', 'nothing': 'No Intervention'},
+    font=dict(size=22),
   )
 
 

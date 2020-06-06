@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 92627a267d1cd8f65607e6b4e531cf9a
+# md5: 48e9cebe85044e7ec0d3c3f4dabe6cb5
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -799,10 +799,52 @@ def plot_latency_for_all_users_nonrandom():
     #xlabel = 'Seconds elapsed until user chooses a difficulty (only including sessions where the user made a choice)',
     xlabel = 'Seconds elapsed until user chooses a difficulty',
     ylabel = 'Number of sessions',
-    title = 'Time needed for users to choose intervention difficulty each session',
-    font=dict(size=18),
+    title = 'Time spent choosing intervention difficulty each session',
+    font=dict(size=22),
   )
   #iplot(data)
+
+
+
+def plot_latency_for_all_users_nonrandom_v2():
+  latency_list_all = []
+  user_to_install_ids = get_user_to_all_install_ids()
+  for user in get_users():
+    if user not in user_to_install_ids:
+      continue
+    #if len(user_to_install_ids[user]) != 1:
+    #  continue
+    impressions_info_list,actions_info_list,tab_id_to_session_id_to_impressions,tab_id_to_session_id_to_actions = get_impressions_paired_with_actions(user)
+    #get_impressions_paired_with_actions(user)
+    for x in actions_info_list:
+      if not x['is_paired']:
+        continue
+      if 'is_random' not in x:
+        continue
+      if x['is_random'] == True:
+        continue
+      tab_id = x['tab_id']
+      session_id = x['session_id']
+      action_timestamp = x['timestamp_local']
+      impression_info = tab_id_to_session_id_to_impressions[tab_id][session_id][0]
+      impression_timestamp = impression_info['timestamp_local']
+      latency = (action_timestamp - impression_timestamp) / 1000
+      if not (0 < latency < 30):
+        continue
+      latency_list_all.append(latency)
+  #x = np.random.randn(500)
+  data = [go.Histogram(x=latency_list_all)]
+  plot_data(
+    data,
+    #xlabel = 'Seconds elapsed until user chooses a difficulty (only including sessions where the user made a choice)',
+    xlabel = 'Seconds elapsed until user chooses a difficulty',
+    ylabel = 'Number of sessions',
+    title = 'Time spent choosing intervention difficulty each session',
+    font=dict(size=22),
+  )
+  #iplot(data)
+
+
 
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 5ee6236fe536924d7b2ab8e535cad0f1
+# md5: b5b67ca557442abde7b38cdce8b0dbbe
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -160,6 +160,9 @@ def make_domain_to_daily_time_dataframe():
 
 
 
+get_ipython().run_cell_magic('R', '', '\nlibrary(lme4)\n#library(sjPlot)\nlibrary(lmerTest)\nlibrary(stargazer)')
+
+
 
 # %%R
 
@@ -174,6 +177,15 @@ def make_domain_to_daily_time_dataframe():
 
 
 
+get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\ndf$domain <- as.factor(df$domain)\ndf$condition <- as.factor(df$condition)\ndf$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard", "survey", "nodefault_forcedchoice_userchoice"))\ndf$epoch <- as.factor(df$epoch)\ndf$logtime <- as.numeric(df$logtime)\ndf$time <- as.numeric(df$time)\nsummary(df)\n\n')
+
+
+
+get_ipython().run_cell_magic('R', '', "\n#dfsub <- df[df$domain == 'www.youtube.com', ]\n#show(summary(dfsub))\n#show(summary(subset(df, domain='www.youtube.com')))\n#dfsub <- subset(df, domain='www.youtube.com')\n#show(summary(dfsub))")
+
+
+
+get_ipython().run_cell_magic('R', '', '\ndfsub <- df[df$domain == \'www.facebook.com\', ]\nshow(summary(dfsub))\n#results <- lmer(logtime ~ condition + (1|user), data = df)\nresults <- lmer(logtime ~ condition + (1|user), data = dfsub)\n#results <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\nshow(results)\nshow(summary(results))\nclass(results) <- "lmerMod"\nstargazer(results)')
 
 
 
