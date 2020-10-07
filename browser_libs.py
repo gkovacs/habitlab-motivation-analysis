@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-# md5: 6a0f6b569143ba367bbae7f185c81d05
+# md5: a57c63eeefde3fcd26385b2ec746a610
 #!/usr/bin/env python
 # coding: utf-8
 
 
 
-import os
-if 'R_HOME' not in os.environ:
-  os.environ['R_HOME'] = '/usr/lib/R'
+# import os
+# if 'R_HOME' not in os.environ:
+#   os.environ['R_HOME'] = '/usr/lib/R'
 
 
 
@@ -113,6 +113,10 @@ def get_collection_for_install(install_id, collection_name):
     return []
   items = get_collection_for_user(user, collection_name)
   return [x for x in items if x.get('install_id') == install_id]
+
+def get_collection_for_install_olddata(install_id, collection_name):
+  items = get_collection_for_install(install_id, collection_name)
+  return [x for x in items if x.get('timestamp', 0) < 1590641736732]
 
 
 

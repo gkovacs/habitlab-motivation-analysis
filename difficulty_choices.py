@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 4d1f7ed561e03ff8afb69192302f82d8
+# md5: 8445b18c28cc6b392ae411236c6759d2
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -154,7 +154,7 @@ def plot_difficulty_choices_heatmap():
       [0.75, 'rgb(252, 229, 64)'],
       [1.0, 'rgb(252, 229, 64)'],
     ],
-    ticktext = ['Nothing', 'Easy', 'Medium', 'Hard'],
+    ticktext = ['No Intervention', 'Easy', 'Medium', 'Hard'],
   )
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 3a107cc179d1966421dc078d1e47f022
+# md5: 4a472bc388e99b94d196d0001a904ac5
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -153,10 +153,16 @@ def make_domain_to_daily_time_dataframe():
 
 
 
+get_ipython().run_line_magic('Rpush', 'df')
+
+
 
 #%%R
 #install.library
 
+
+
+get_ipython().run_cell_magic('R', '', 'library(lme4)\n#library(sjPlot)\nlibrary(lmerTest)\nlibrary(stargazer)')
 
 
 
@@ -172,6 +178,12 @@ def make_domain_to_daily_time_dataframe():
 # summary(df)
 
 
+
+get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\ndf$domain <- as.factor(df$domain)\ndf$condition <- as.factor(df$condition)\ndf$condition <- factor(df$condition, levels = c("survey_nochoice_nothing", "survey_nochoice_easy", "survey_nochoice_medium", "survey_nochoice_hard", "survey", "nodefault_forcedchoice_userchoice"))\ndf$epoch <- as.factor(df$epoch)\ndf$logtime <- as.numeric(df$logtime)\ndf$time <- as.numeric(df$time)\nsummary(df)\n\n')
+
+
+
+get_ipython().run_cell_magic('R', '', '\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user), data = df)\nresults <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\nshow(results)\nshow(summary(results))\nclass(results) <- "lmerMod"\nstargazer(results)')
 
 
 

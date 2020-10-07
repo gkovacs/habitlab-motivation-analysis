@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 7c0ce6e75e05ee82cef8374870936500
+# md5: aac3bbfd263895eccb9f9db2e0b5cdb2
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -498,15 +498,23 @@ def get_all_install_info_for_user(user):
 
 
 
+#retention_info['lifetime']
+
+
+
 
 
 #plot_attrition_df
 
 
 
+get_ipython().run_cell_magic('R', '-w 1000', 'plot_attrition_df$lifetime <- as.numeric(plot_attrition_df$lifetime)\nplot_attrition_df$attritioned <- as.logical(plot_attrition_df$attritioned)\nplot_attrition_df$Frequency <- as.factor(plot_attrition_df$Frequency)\nplot_attrition_df$Frequency <- factor(plot_attrition_df$Frequency, levels = c(\'0% of visits\', \'25% of visits\', \'50% of visits\', \'100% of visits\'))\nlibrary("survival")\nlibrary("survminer")\nfit <- survfit(Surv(lifetime, attritioned) ~ Frequency, data=plot_attrition_df)\nsummary(fit)\nggsurv <- ggsurvplot(fit,\n  pval = TRUE, conf.int = TRUE,\n  risk.table = "percentage", # Add risk table\n  xlab = "Time in days",\n  #risk.table = TRUE, # Add risk table\n  risk.table.col = "strata", # Change risk table color by groups\n  risk.table.y.text = FALSE,\n  linetype = "strata", # Change line type by groups\n  surv.median.line = "hv", # Specify median survival\n  ggtheme = theme_bw(), # Change ggplot2 theme\n  tables.theme = clean_theme(),\n  #font.x = 40, #c(80, "bold"),\n  #font.y = 40, #c(80, "bold"),\n  #risk.table.fontsize = 40,\n  #pval.size = 60,\n)\n#ggsurv$plot <- ggsurv$plot + theme(legend.text = element_text(size = 60, color = "black"))\n#ggsurv$plot <- ggsurv$plot + theme(legend.text = element_text(size = 80, color = "black", face = "bold"))\n#ggsurv\nggsave("retention_costs.png", plot=print(ggsurv), dpi = 300)')
 
 
-#len(set(list(retention_info['install']))
+
+get_ipython().run_cell_magic('R', '-w 1000', 'coxph(formula = Surv(lifetime, attritioned) ~ Frequency, data = plot_attrition_df)')
+
+
 
 
 

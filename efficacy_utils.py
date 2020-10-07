@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: b5b67ca557442abde7b38cdce8b0dbbe
+# md5: fe68d2f219c880dbe6d5bf2c4cabeb9b
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -182,6 +182,10 @@ get_ipython().run_cell_magic('R', '', '\ndf$user <- as.factor(df$user)\ndf$domai
 
 
 get_ipython().run_cell_magic('R', '', "\n#dfsub <- df[df$domain == 'www.youtube.com', ]\n#show(summary(dfsub))\n#show(summary(subset(df, domain='www.youtube.com')))\n#dfsub <- subset(df, domain='www.youtube.com')\n#show(summary(dfsub))")
+
+
+
+get_ipython().run_cell_magic('R', '', '\ndfsub <- df\nshow(summary(dfsub))\n#results <- lmer(logtime ~ condition + (1|user), data = df)\n#results <- lmer(logtime ~ condition + (1|user), data = dfsub)\nresults <- lmer(logtime ~ condition + (1|user) + (1|domain), data = df)\nshow(results)\nshow(summary(results))\nclass(results) <- "lmerMod"\nstargazer(results)')
 
 
 

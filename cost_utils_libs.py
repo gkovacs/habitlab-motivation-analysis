@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: 48e9cebe85044e7ec0d3c3f4dabe6cb5
+# md5: 2ebc816d5c72da83b6c3558a2afbf96e
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -850,6 +850,71 @@ def plot_latency_for_all_users_nonrandom_v2():
 
 
 
+
+
+
+
+
+
+
+
+url_to_domain('http://facebook.com')
+
+
+
+#len(info_list)
+
+
+
+# from browser_libs import *
+
+# df = convert_list_of_dicts_into_dataframe(info_list)
+
+
+
+#Counter([x['have_prompt'] for x in info_list])
+
+
+
+#np.median([x['seconds'] for x in info_list if (x['seconds'] > 0 and x['have_prompt'])])
+
+
+
+#np.median([x['seconds'] for x in info_list if (x['seconds'] > 0 and not x['have_prompt'])])
+
+
+
+#np.mean([x['seconds'] for x in info_list if (x['seconds'] > 0 and x['have_prompt'])])
+
+
+
+#np.mean([x['seconds'] for x in info_list if (x['seconds'] > 0 and not x['have_prompt'])])
+
+
+
+# import scipy
+# import scipy.stats
+
+# scipy.stats.ttest_ind([x['seconds'] for x in info_list if (x['seconds'] > 0 and x['have_prompt'])], [x['seconds'] for x in info_list if (x['seconds'] > 0 and (not x['have_prompt']))])
+
+
+
+#scipy.stats.ttest_ind([math.log(x['seconds']) for x in info_list if (x['seconds'] > 0 and x['have_prompt'])], [math.log(x['seconds']) for x in info_list if (x['seconds'] > 0 and (not x['have_prompt']))])
+
+
+
+#scipy.stats.mannwhitneyu([x['seconds'] for x in info_list if (x['seconds'] > 0 and x['have_prompt'])], [x['seconds'] for x in info_list if (x['seconds'] > 0 and (not x['have_prompt']))])
+
+
+
+
+
+
+
+
+
+
+
 def plot_latency_for_all_users_random():
   latency_list_all = []
   user_to_install_ids = get_user_to_all_install_ids()
@@ -905,4 +970,8 @@ def plot_latency_for_all_users_random_and_nonrandom():
       latency_list_all.append(latency)
   data = [go.Histogram(x=latency_list_all)]
   iplot(data)
+
+
+
+
 

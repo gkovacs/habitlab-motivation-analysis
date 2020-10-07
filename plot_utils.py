@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# md5: c17d3acd334f1ed8f0bf856dd96c176c
+# md5: 08b7127550ed2b7719bc411eb8a0e3bb
 #!/usr/bin/env python
 # coding: utf-8
 
@@ -16,6 +16,7 @@ def plot_data(data, **kwargs):
   xlabel = kwargs.get('xlabel')
   ylabel = kwargs.get('ylabel')
   font = kwargs.get('font')
+  tozero = kwargs.get('tozero')
   
   layout = go.Layout()
   if title is not None:
@@ -26,6 +27,8 @@ def plot_data(data, **kwargs):
     layout.yaxis = go.layout.YAxis(title = ylabel)
   if font is not None:
     layout.font = font
+  if tozero is not None:
+    layout.yaxis.rangemode = 'tozero'
   fig = go.Figure(data=data, layout=layout)
   iplot(fig)
 
@@ -57,29 +60,26 @@ def plot_bar(label_with_value_list, **kwargs):
 
 def plot_dict_as_bar(d, **kwargs):
   data = []
-  items = list(d.items())
-  items.sort(key=lambda x: x[1], reverse=True)
+  if kwargs.get('key_order'):
+    items = [(x, d[x]) for x in kwargs.get('key_order')]
+  else:
+    items = list(d.items())
+    items.sort(key=lambda x: x[1], reverse=True)
   plot_bar(items, **kwargs)
 
 def plot_dict_as_bar_percent(d, **kwargs):
-  data = []
   nd = {}
   val_sum = sum(d.values())
   for k,v in d.items():
     nd[k] = 100 * v / val_sum
-  items = list(nd.items())
-  items.sort(key=lambda x: x[1], reverse=True)
-  plot_bar(items, **kwargs)
+  plot_dict_as_bar(nd, **kwargs)
 
 def plot_dict_as_bar_fraction(d, **kwargs):
-  data = []
   nd = {}
   val_sum = sum(d.values())
   for k,v in d.items():
     nd[k] = v / val_sum
-  items = list(nd.items())
-  items.sort(key=lambda x: x[1], reverse=True)
-  plot_bar(items, **kwargs)
+  plot_dict_as_bar(nd, **kwargs)
 
 def plot_heatmap(heatmap_data, **kwargs):
   ticktext = kwargs.get('ticktext')
